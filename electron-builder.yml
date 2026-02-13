@@ -1,0 +1,30 @@
+appId: com.openphotobooth.app
+productName: Open Photobooth
+directories:
+  buildResources: build
+  output: release
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,package-lock.json}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!{vitest.config.ts,tests/**/*,coverage/**/*}'
+  - '!{CLAUDE.md,TECH_STACK.md,docs/**/*}'
+asarUnpack:
+  - resources/**
+win:
+  executableName: open-photobooth
+  target:
+    - target: portable
+      arch:
+        - x64
+portable:
+  artifactName: ${name}-${version}-portable.${ext}
+# Compression settings: 'store' = no compression (fast build, larger file ~200MB)
+# 'normal' = some compression (moderate speed, ~150MB)
+# 'maximum' = full compression (slowest, ~100MB)
+# Default is 'normal' to avoid NSIS integrity check errors
+compression: normal
+npmRebuild: false

@@ -1,0 +1,30 @@
+diff --git a/node_modules/app-builder-lib/out/targets/archive.js b/node_modules/app-builder-lib/out/targets/archive.js
+index 3649729..46c794f 100644
+--- a/node_modules/app-builder-lib/out/targets/archive.js
++++ b/node_modules/app-builder-lib/out/targets/archive.js
+@@ -59,6 +59,10 @@ function compute7zCompressArgs(format, options = {}) {
+         args.push(`-mx=${process.env.ELECTRON_BUILDER_COMPRESSION_LEVEL}`);
+         isLevelSet = true;
+     }
++    // Enable multi-threaded compression (significantly faster)
++    // Set ELECTRON_BUILDER_7Z_THREADS to control thread count (default: on = all cores)
++    const threadCount = process.env.ELECTRON_BUILDER_7Z_THREADS || "on";
++    args.push(`-mmt=${threadCount}`);
+     const isZip = format === "zip";
+     if (!storeOnly) {
+         if (isZip && options.compression === "maximum") {
+@@ -104,6 +108,14 @@ function compute7zCompressArgs(format, options = {}) {
+     else if (isZip || storeOnly) {
+         args.push(`-mm=${storeOnly ? "Copy" : "Deflate"}`);
+     }
++    else if (format === "7z" || format.endsWith(".7z")) {
++        // Use LZMA2 for 7z archives - much better multithreading support than LZMA
++        // Set ELECTRON_BUILDER_COMPRESSION_METHOD to override (e.g., BZip2, LZMA, etc.)
++        const method = process.env.ELECTRON_BUILDER_COMPRESSION_METHOD || "LZMA2";
++        if (method !== "DEFAULT") {
++            args.push(`-mm=${method}`);
++        }
++    }
+     if (isZip) {
+         // -mcu switch:  7-Zip uses UTF-8, if there are non-ASCII symbols.
+         // because default mode: 7-Zip uses UTF-8, if the local code page doesn't contain required symbols.

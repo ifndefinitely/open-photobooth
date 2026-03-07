@@ -262,7 +262,7 @@ The app needs to run as a native desktop application on Windows 11 with access t
 
 **Acceptance Criteria:**
 
-- Running a single command produces a Windows distributable (installer or portable .exe).
+- Running a single command produces a Windows NSIS installer (`.exe`).
 - The output includes the application name, version, and icon.
 - The packaged application launches and shows a blank/placeholder window.
 - The packaging command is documented.

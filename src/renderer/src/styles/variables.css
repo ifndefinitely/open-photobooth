@@ -1,0 +1,16 @@
+:root {
+  --color-bg: #000000;
+  --color-text: #ffffff;
+  --color-accent: #4a90d9;
+  --color-accent-active: #3a7bc8;
+  --color-surface: #1a1a1a;
+  --color-surface-light: #2a2a2a;
+  --color-error: #e74c3c;
+  --color-success: #2ecc71;
+
+  --touch-target-min: 48px;
+  --button-radius: 12px;
+
+  --z-index-modal: 1000;
+  --z-index-dialog: 1100;
+}

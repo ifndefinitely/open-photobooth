@@ -1,11 +1,15 @@
+import type { ComponentType } from 'react'
+import WebcamSection from './sections/WebcamSection/WebcamSection'
+
 export interface AdminSection {
   id: string
   label: string
+  component?: ComponentType
 }
 
 export const ADMIN_SECTIONS: readonly AdminSection[] = [
   { id: 'appearance', label: 'Appearance' },
-  { id: 'webcam', label: 'Webcam' },
+  { id: 'webcam', label: 'Webcam', component: WebcamSection },
   { id: 'printer', label: 'Printer' },
   { id: 'photo-session', label: 'Photo Session' },
   { id: 'filters', label: 'Filters' },

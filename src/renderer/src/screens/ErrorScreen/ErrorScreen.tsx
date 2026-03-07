@@ -1,17 +1,25 @@
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useSessionStore } from '@/stores/sessionStore'
 import styles from '@/styles/placeholder.module.css'
 
 function ErrorScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
+  const lastError = useSessionStore((state) => state.lastError)
+  const clearError = useSessionStore((state) => state.setLastError)
+
+  const handleGoHome = (): void => {
+    clearError(null)
+    goHome()
+  }
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Something went wrong</h1>
+      <h1 className={styles.title}>{lastError?.message ?? 'Something went wrong'}</h1>
       <p className={styles.subtitle}>
-        Placeholder — detailed error messages will be added in Epic 11
+        {lastError?.details ?? 'An unexpected error occurred. Please try again.'}
       </p>
       <div className={styles.actions}>
-        <button className={styles.button} onClick={goHome}>
+        <button className={styles.button} onClick={handleGoHome}>
           Back to Home
         </button>
       </div>

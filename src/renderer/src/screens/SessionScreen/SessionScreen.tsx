@@ -1,20 +1,23 @@
-import { useNavigationStore } from '@/stores/navigationStore'
-import styles from '@/styles/placeholder.module.css'
+import CameraPreview from '@/components/CameraPreview/CameraPreview'
+import CountdownOverlay from '@/components/CountdownOverlay/CountdownOverlay'
+import FlashOverlay from '@/components/FlashOverlay/FlashOverlay'
+import ThumbnailFeedback from '@/components/ThumbnailFeedback/ThumbnailFeedback'
+import PhotoProgress from '@/components/PhotoProgress/PhotoProgress'
+import GetReadyOverlay from '@/components/GetReadyOverlay/GetReadyOverlay'
+import { useSessionSequence } from '@/hooks/useSessionSequence'
+import styles from './SessionScreen.module.css'
 
 function SessionScreen(): React.JSX.Element {
-  const navigateTo = useNavigationStore((state) => state.navigateTo)
+  useSessionSequence()
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Photo Session</h1>
-      <p className={styles.subtitle}>
-        Placeholder — countdown and capture will be added in Epic 04
-      </p>
-      <div className={styles.actions}>
-        <button className={styles.button} onClick={() => navigateTo('review')}>
-          Next → Review
-        </button>
-      </div>
+      <CameraPreview className={styles.preview} />
+      <PhotoProgress />
+      <CountdownOverlay />
+      <GetReadyOverlay />
+      <FlashOverlay />
+      <ThumbnailFeedback />
     </div>
   )
 }

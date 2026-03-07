@@ -45,3 +45,6 @@ npm-debug.log*
 # Vite logs
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Pre-commit scans
+*precommit-scan.sh

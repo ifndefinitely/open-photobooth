@@ -1,0 +1,39 @@
+.thumbnail {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 55;
+  width: 120px;
+  height: 90px;
+  border-radius: 8px;
+  border: 3px solid #ffffff;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: thumbnailFade 500ms ease-out forwards;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes thumbnailFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}

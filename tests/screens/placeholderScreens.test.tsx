@@ -1,25 +1,56 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
+import { useStripStore } from '@/stores/stripStore'
 import ReviewScreen from '@/screens/ReviewScreen/ReviewScreen'
 import PrintScreen from '@/screens/PrintScreen/PrintScreen'
 import ThankYouScreen from '@/screens/ThankYouScreen/ThankYouScreen'
 import ErrorScreen from '@/screens/ErrorScreen/ErrorScreen'
 import AdminScreen from '@/screens/AdminScreen/AdminScreen'
 
+// Mock the window.api for printer operations
+const mockPrinterApi = {
+  getPrinters: vi.fn().mockResolvedValue([]),
+  checkAvailability: vi.fn().mockResolvedValue({ available: true, status: 'ready' }),
+  print: vi.fn().mockResolvedValue({ success: true })
+}
+
+beforeEach(() => {
+  window.api = { printer: mockPrinterApi } as never
+  vi.clearAllMocks()
+})
+
 // SessionScreen is fully implemented in Epic 04 — placeholder tests removed.
 
 describe('ReviewScreen', () => {
-  beforeEach(() => useNavigationStore.getState().reset())
+  beforeEach(() => {
+    useNavigationStore.getState().reset()
+    usePrinterSettingsStore.getState().setPrinterName('TestPrinter')
+  })
 
   it('renders review title', () => {
     render(<ReviewScreen />)
     expect(screen.getByText('Review Your Photos')).toBeInTheDocument()
   })
 
-  it('navigates to print directly', () => {
+  it('shows print confirmation after printer check', async () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Print' }))
+    await waitFor(() => {
+      expect(screen.getByText('Print Your Photos?')).toBeInTheDocument()
+    })
+  })
+
+  it('navigates to print after confirming', async () => {
+    render(<ReviewScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Print' }))
+    await waitFor(() => {
+      expect(screen.getByText('Print Your Photos?')).toBeInTheDocument()
+    })
+    // There are two "Print" buttons — the action bar one and the dialog confirm one
+    const printButtons = screen.getAllByRole('button', { name: 'Print' })
+    fireEvent.click(printButtons[printButtons.length - 1])
     expect(useNavigationStore.getState().currentScreen).toBe('print')
   })
 
@@ -61,17 +92,43 @@ describe('ReviewScreen', () => {
 })
 
 describe('PrintScreen', () => {
-  beforeEach(() => useNavigationStore.getState().reset())
+  const fakePrintSheet = {
+    blob: new Blob(['test'], { type: 'image/png' }),
+    dataUrl: 'data:image/png;base64,test',
+    width: 600,
+    height: 900
+  }
 
-  it('renders printing title', () => {
-    render(<PrintScreen />)
-    expect(screen.getByText('Printing...')).toBeInTheDocument()
+  beforeEach(() => {
+    useNavigationStore.getState().reset()
+    usePrinterSettingsStore.getState().setPrinterName('TestPrinter')
+    useStripStore.getState().setPrintSheetResult(fakePrintSheet)
+    // Make print hang so we can see the "printing" state
+    mockPrinterApi.print.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve({ success: true }), 60000))
+    )
   })
 
-  it('navigates to thank you', () => {
+  it('renders printing message', () => {
     render(<PrintScreen />)
-    fireEvent.click(screen.getByRole('button', { name: /thank you/i }))
-    expect(useNavigationStore.getState().currentScreen).toBe('thankyou')
+    expect(screen.getByText('Printing your photos...')).toBeInTheDocument()
+  })
+
+  it('shows error state when print fails', async () => {
+    mockPrinterApi.print.mockResolvedValueOnce({ success: false, error: 'Paper jam' })
+    render(<PrintScreen />)
+    await waitFor(() => {
+      expect(screen.getByText('Printing Failed')).toBeInTheDocument()
+    })
+  })
+
+  it('shows try again and back buttons on error', async () => {
+    mockPrinterApi.print.mockResolvedValueOnce({ success: false, error: 'Paper jam' })
+    render(<PrintScreen />)
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Try Again' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
+    })
   })
 })
 
@@ -80,12 +137,17 @@ describe('ThankYouScreen', () => {
 
   it('renders thank you title', () => {
     render(<ThankYouScreen />)
-    expect(screen.getByText('Thank You!')).toBeInTheDocument()
+    expect(screen.getByText('Enjoy Your Photos!')).toBeInTheDocument()
   })
 
-  it('navigates to home', () => {
+  it('renders subtitle', () => {
     render(<ThankYouScreen />)
-    fireEvent.click(screen.getByRole('button', { name: /home/i }))
+    expect(screen.getByText('Thank you for visiting our photobooth!')).toBeInTheDocument()
+  })
+
+  it('navigates to home via Done button', () => {
+    render(<ThankYouScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     expect(useNavigationStore.getState().currentScreen).toBe('home')
   })
 })

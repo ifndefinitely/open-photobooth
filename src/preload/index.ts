@@ -1,8 +1,15 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  printer: {
+    getPrinters: (): Promise<unknown[]> => ipcRenderer.invoke('printer:get-list'),
+    checkAvailability: (printerName: string): Promise<unknown> =>
+      ipcRenderer.invoke('printer:check-availability', printerName),
+    print: (options: unknown): Promise<unknown> => ipcRenderer.invoke('printer:print', options)
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

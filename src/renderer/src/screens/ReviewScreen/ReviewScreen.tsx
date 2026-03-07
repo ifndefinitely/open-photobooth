@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { useStripStore } from '@/stores/stripStore'
 import { useStripSettingsStore } from '@/stores/stripSettingsStore'
+import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { useIdleTimeout } from '@/hooks/useIdleTimeout'
 import { useStripComposition } from '@/hooks/useStripComposition'
 import ConfirmationDialog from '@/components/ConfirmationDialog/ConfirmationDialog'
@@ -12,7 +13,7 @@ import FilterSelector from '@/components/FilterSelector/FilterSelector'
 import type { FilterType } from '@/stores/stripStore'
 import styles from './ReviewScreen.module.css'
 
-type ConfirmAction = 'redo' | 'abort' | null
+type ConfirmAction = 'redo' | 'abort' | 'print' | 'printerError' | null
 
 function ReviewScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
@@ -30,8 +31,38 @@ function ReviewScreen(): React.JSX.Element {
   const filterSepia = useStripSettingsStore((s) => s.filterSepia)
   const filterVintage = useStripSettingsStore((s) => s.filterVintage)
 
+  const printerName = usePrinterSettingsStore((s) => s.printerName)
+
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
+  const [isCheckingPrinter, setIsCheckingPrinter] = useState(false)
+  const [printerErrorDetail, setPrinterErrorDetail] = useState('')
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
+
+  const handlePrintPress = useCallback(async () => {
+    if (!printerName) {
+      setPrinterErrorDetail('No printer selected. Please configure a printer in Admin Settings.')
+      setConfirmAction('printerError')
+      return
+    }
+
+    setIsCheckingPrinter(true)
+    try {
+      const result = await window.api.printer.checkAvailability(printerName)
+      if (result.available) {
+        setConfirmAction('print')
+      } else {
+        setPrinterErrorDetail(
+          `Printer "${printerName}" is not available (status: ${result.status}).`
+        )
+        setConfirmAction('printerError')
+      }
+    } catch {
+      setPrinterErrorDetail('Could not check printer status.')
+      setConfirmAction('printerError')
+    } finally {
+      setIsCheckingPrinter(false)
+    }
+  }, [printerName])
 
   // Orchestrate the composition pipeline
   useStripComposition()
@@ -72,10 +103,10 @@ function ReviewScreen(): React.JSX.Element {
       <div className={styles.actions}>
         <button
           className={styles.button}
-          onClick={() => navigateTo('print')}
-          disabled={isComposing || !!compositionError}
+          onClick={handlePrintPress}
+          disabled={isComposing || !!compositionError || isCheckingPrinter}
         >
-          Print
+          {isCheckingPrinter ? 'Checking printer...' : 'Print'}
         </button>
         <button className={styles.buttonSecondary} onClick={() => setConfirmAction('redo')}>
           Redo
@@ -103,6 +134,36 @@ function ReviewScreen(): React.JSX.Element {
           cancelLabel="Cancel"
           variant="danger"
           onConfirm={() => navigateTo('home')}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction === 'print' && (
+        <ConfirmationDialog
+          title="Print Your Photos?"
+          message="Your photo strip will be printed."
+          confirmLabel="Print"
+          cancelLabel="Cancel"
+          onConfirm={() => {
+            setConfirmAction(null)
+            navigateTo('print')
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction === 'printerError' && (
+        <ConfirmationDialog
+          title="Printer Not Connected"
+          message={
+            printerErrorDetail ||
+            'Your photos could not be printed right now. Please contact the store owner for help.'
+          }
+          confirmLabel="Try Again"
+          cancelLabel="Back"
+          variant="danger"
+          onConfirm={() => {
+            setConfirmAction(null)
+            handlePrintPress()
+          }}
           onCancel={() => setConfirmAction(null)}
         />
       )}

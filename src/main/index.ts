@@ -2,8 +2,9 @@ import { app, BrowserWindow, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { registerIpcHandlers } from './ipcHandlers'
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   const isDev = is.dev
   const isLinux = process.platform === 'linux'
 
@@ -42,6 +43,8 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 app.whenReady().then(() => {
@@ -61,7 +64,8 @@ app.whenReady().then(() => {
     })
   }
 
-  createWindow()
+  const mainWindow = createWindow()
+  registerIpcHandlers(mainWindow)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

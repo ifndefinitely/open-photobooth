@@ -1,0 +1,69 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--color-bg) 0%, #1a1a2e 100%);
+  gap: 20px;
+}
+
+.title {
+  color: var(--color-text);
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  animation: popIn 0.6s ease-out;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.subtitle {
+  color: var(--color-text-secondary, #aaa);
+  font-size: 1.2rem;
+  text-align: center;
+  margin: 0;
+  animation: popIn 0.6s ease-out 0.2s both;
+}
+
+.stripPreview {
+  max-width: 240px;
+  max-height: 40vh;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  animation: popIn 0.6s ease-out 0.4s both;
+}
+
+.doneButton {
+  min-height: var(--touch-target-min);
+  padding: 18px 60px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    background-color 0.1s ease;
+  touch-action: manipulation;
+  animation: popIn 0.6s ease-out 0.6s both;
+}
+
+.doneButton:active {
+  transform: scale(0.95);
+  background-color: var(--color-accent-active);
+}

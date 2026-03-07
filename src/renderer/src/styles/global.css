@@ -1,5 +1,21 @@
 @import './variables.css';
 
+@font-face {
+  font-family: 'Inter';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/Inter-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../assets/fonts/Inter-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {

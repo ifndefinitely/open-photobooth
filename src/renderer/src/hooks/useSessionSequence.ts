@@ -3,6 +3,7 @@ import { useSessionStore } from '@/stores/sessionStore'
 import { useSessionSettingsStore } from '@/stores/sessionSettingsStore'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useCameraStore } from '@/stores/cameraStore'
+import { useStripStore } from '@/stores/stripStore'
 
 /**
  * Orchestrates the entire photo session sequence:
@@ -20,6 +21,7 @@ export function useSessionSequence(): void {
   useEffect(() => {
     mountedRef.current = true
     useSessionStore.getState().resetSession()
+    useStripStore.getState().resetStrip()
 
     // --- Timer helpers (scoped to this effect) ---
 

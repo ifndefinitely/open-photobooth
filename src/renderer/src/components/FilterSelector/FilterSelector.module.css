@@ -1,0 +1,60 @@
+.container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 12px 0;
+  flex-shrink: 0;
+}
+
+.filterButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease;
+  touch-action: manipulation;
+  min-height: var(--touch-target-min);
+}
+
+.filterButton:active {
+  transform: scale(0.95);
+}
+
+.filterButton.selected {
+  border-color: var(--color-accent);
+}
+
+.thumbnailWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color-surface);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+
+.thumbnailPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface-light);
+}
+
+.filterLabel {
+  color: var(--color-text);
+  font-size: 0.85rem;
+  user-select: none;
+}

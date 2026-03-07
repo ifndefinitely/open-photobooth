@@ -163,16 +163,17 @@ _Installed in its own epic — not part of the initial scaffold._
 
 ---
 
-## Packaging: electron-builder (Windows portable EXE)
+## Packaging: electron-builder (Windows NSIS installer)
 
-**Why:** electron-builder supports portable EXE output (no installer required), which is ideal for a kiosk app that may be deployed by non-technical users. It has mature Windows support, handles code signing, and integrates well with CI pipelines.
+**Why:** electron-builder produces a standard Windows NSIS installer (`.exe`) that extracts all application files to disk once at install time. Subsequent launches read directly from disk with OS-level file caching — no runtime decompression. This gives a ~2–4 second cold-launch time instead of the 10–15 seconds a self-extracting portable EXE requires (which decompresses ~150MB into `%TEMP%` on every launch). The installer also provides proper Windows integration: the app appears in Programs & Features / Add or Remove Apps, creates Start Menu and desktop shortcuts, and supports clean uninstall. electron-builder has mature Windows support, handles code signing, and integrates well with CI pipelines.
 
 **Alternatives considered:**
 
-| Alternative       | Why not                                                                                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Electron Forge    | More opinionated about the full workflow (dev + build + publish). We only need packaging. electron-builder is more flexible. |
-| electron-packager | Lower-level, requires more manual configuration for installers and platform-specific settings.                               |
+| Alternative       | Why not                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Portable EXE      | Self-extracts ~150MB into `%TEMP%` on every launch, causing 10–15 second startup on Windows 11. Windows Defender scanning the extracted files makes it worse. |
+| Electron Forge    | More opinionated about the full workflow (dev + build + publish). We only need packaging. electron-builder is more flexible.                                  |
+| electron-packager | Lower-level, requires more manual configuration for installers and platform-specific settings.                                                                |
 
 ---
 

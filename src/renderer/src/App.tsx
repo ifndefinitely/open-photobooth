@@ -1,19 +1,11 @@
+import Layout from '@/components/Layout/Layout'
+import ScreenRouter from '@/components/ScreenRouter/ScreenRouter'
+
 function App(): React.JSX.Element {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        backgroundColor: '#000',
-        color: '#fff',
-        fontFamily: 'sans-serif',
-        fontSize: '2rem'
-      }}
-    >
-      Open Photobooth — Loading...
-    </div>
+    <Layout>
+      <ScreenRouter />
+    </Layout>
   )
 }
 

@@ -20,14 +20,16 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "package": "npm run build && electron-builder --win",
+    "package:quick": "npm run build && electron-builder --win -c.compression=store",
     "package:dir": "npm run build && electron-builder --dir",
-    "package:release": "npm run build && electron-builder --win -c.compression=normal",
-    "postinstall": "patch-package && electron-builder install-app-deps",
+    "package:release": "npm run build && electron-builder --win",
+    "postinstall": "electron-builder install-app-deps",
     "prepare": "husky"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
-    "@electron-toolkit/utils": "^4.0.0"
+    "@electron-toolkit/utils": "^4.0.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
@@ -50,7 +52,6 @@
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.0",
-    "patch-package": "^8.0.1",
     "prettier": "^3.7.4",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

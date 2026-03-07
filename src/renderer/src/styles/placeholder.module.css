@@ -1,0 +1,66 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 32px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button {
+  min-height: var(--touch-target-min);
+  min-width: 140px;
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    background-color 0.1s ease;
+  touch-action: manipulation;
+}
+
+.button:active {
+  transform: scale(0.95);
+  background-color: var(--color-accent-active);
+}
+
+.buttonSecondary {
+  composes: button;
+  background-color: var(--color-surface-light);
+}
+
+.buttonSecondary:active {
+  background-color: var(--color-surface);
+}
+
+.buttonDanger {
+  composes: button;
+  background-color: var(--color-error);
+}
+
+.buttonDanger:active {
+  background-color: #c0392b;
+}

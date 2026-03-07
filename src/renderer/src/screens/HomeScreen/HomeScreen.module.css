@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface);
+  min-height: 70%;
+  color: var(--color-text);
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
+.buttonArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.takePhotosButton {
+  min-height: 80px;
+  min-width: 200px;
+  padding: 16px 48px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    background-color 0.1s ease;
+  touch-action: manipulation;
+}
+
+.takePhotosButton:active {
+  transform: scale(0.95);
+  background-color: var(--color-accent-active);
+}

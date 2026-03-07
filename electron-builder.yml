@@ -17,14 +17,17 @@ asarUnpack:
 win:
   executableName: open-photobooth
   target:
-    - target: portable
+    - target: nsis
       arch:
         - x64
-portable:
-  artifactName: ${name}-${version}-portable.${ext}
-# Compression settings: 'store' = no compression (fast build, larger file ~200MB)
-# 'normal' = some compression (moderate speed, ~150MB)
-# 'maximum' = full compression (slowest, ~100MB)
-# Default is 'normal' to avoid NSIS integrity check errors
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  license: 'LICENSE'
+  artifactName: '${productName}-${version}-setup.${ext}'
+# Compression level for the NSIS installer package (build-time cost only, no effect on app startup).
+# 'normal' = LZMA normal compression, good balance of installer size and build speed.
 compression: normal
 npmRebuild: false

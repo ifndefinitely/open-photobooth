@@ -1,0 +1,109 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-dialog);
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: #1e1e1e;
+  border-radius: 16px;
+  padding: 32px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.dots {
+  display: flex;
+  gap: 16px;
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #666;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dotFilled {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.error {
+  color: var(--color-error);
+  font-size: 0.95rem;
+  min-height: 1.4em;
+  text-align: center;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.key {
+  min-height: 64px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #333;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 0.1s ease,
+    background-color 0.1s ease;
+}
+
+.key:active {
+  transform: scale(0.95);
+  background: #444;
+}
+
+.keyEmpty {
+  visibility: hidden;
+}
+
+.keyBackspace {
+  font-size: 1.2rem;
+}
+
+.cancelButton {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: transparent;
+  border: 1px solid #555;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 0.1s ease,
+    background-color 0.1s ease;
+}
+
+.cancelButton:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.1);
+}

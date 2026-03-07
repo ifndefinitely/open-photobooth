@@ -1,8 +1,11 @@
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useIdleTimeout } from '@/hooks/useIdleTimeout'
+import IdleCountdown from '@/components/IdleCountdown/IdleCountdown'
 import styles from '@/styles/placeholder.module.css'
 
 function ThankYouScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
+  const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
 
   return (
     <div className={styles.container}>
@@ -13,6 +16,7 @@ function ThankYouScreen(): React.JSX.Element {
           Back to Home
         </button>
       </div>
+      {remainingSeconds !== null && <IdleCountdown remainingSeconds={remainingSeconds} />}
     </div>
   )
 }

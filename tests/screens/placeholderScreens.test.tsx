@@ -31,21 +31,45 @@ describe('ReviewScreen', () => {
     expect(screen.getByText('Review Your Photos')).toBeInTheDocument()
   })
 
-  it('navigates to print', () => {
+  it('navigates to print directly', () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Print' }))
     expect(useNavigationStore.getState().currentScreen).toBe('print')
   })
 
-  it('navigates to session on redo', () => {
+  it('shows confirmation dialog on redo', () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
+    expect(screen.getByText('Redo Photos?')).toBeInTheDocument()
+  })
+
+  it('navigates to session after confirming redo', () => {
+    render(<ReviewScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
+    // The confirm button inside the dialog also says "Redo"
+    const redoButtons = screen.getAllByRole('button', { name: 'Redo' })
+    fireEvent.click(redoButtons[redoButtons.length - 1])
     expect(useNavigationStore.getState().currentScreen).toBe('session')
   })
 
-  it('navigates to home on start over', () => {
+  it('dismisses redo dialog on cancel', () => {
+    render(<ReviewScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByText('Redo Photos?')).not.toBeInTheDocument()
+  })
+
+  it('shows confirmation dialog on start over', () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Start Over' }))
+    expect(screen.getByText('Start Over?')).toBeInTheDocument()
+  })
+
+  it('navigates to home after confirming start over', () => {
+    render(<ReviewScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Start Over' }))
+    const startOverButtons = screen.getAllByRole('button', { name: 'Start Over' })
+    fireEvent.click(startOverButtons[startOverButtons.length - 1])
     expect(useNavigationStore.getState().currentScreen).toBe('home')
   })
 })
@@ -100,7 +124,7 @@ describe('AdminScreen', () => {
 
   it('renders admin title', () => {
     render(<AdminScreen />)
-    expect(screen.getByText('Admin Panel')).toBeInTheDocument()
+    expect(screen.getByText('Admin Settings')).toBeInTheDocument()
   })
 
   it('navigates to home on exit', () => {

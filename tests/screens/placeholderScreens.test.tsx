@@ -1,27 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { useNavigationStore } from '@/stores/navigationStore'
-import SessionScreen from '@/screens/SessionScreen/SessionScreen'
 import ReviewScreen from '@/screens/ReviewScreen/ReviewScreen'
 import PrintScreen from '@/screens/PrintScreen/PrintScreen'
 import ThankYouScreen from '@/screens/ThankYouScreen/ThankYouScreen'
 import ErrorScreen from '@/screens/ErrorScreen/ErrorScreen'
 import AdminScreen from '@/screens/AdminScreen/AdminScreen'
 
-describe('SessionScreen', () => {
-  beforeEach(() => useNavigationStore.getState().reset())
-
-  it('renders session title', () => {
-    render(<SessionScreen />)
-    expect(screen.getByText('Photo Session')).toBeInTheDocument()
-  })
-
-  it('navigates to review', () => {
-    render(<SessionScreen />)
-    fireEvent.click(screen.getByRole('button', { name: /review/i }))
-    expect(useNavigationStore.getState().currentScreen).toBe('review')
-  })
-})
+// SessionScreen is fully implemented in Epic 04 — placeholder tests removed.
 
 describe('ReviewScreen', () => {
   beforeEach(() => useNavigationStore.getState().reset())

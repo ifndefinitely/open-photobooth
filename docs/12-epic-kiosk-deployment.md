@@ -2,7 +2,7 @@
 
 ## Description
 
-Implement kiosk mode features (auto-start on boot, prevent system sleep, prevent alt-tab/taskbar access, fullscreen lock, hide cursor) and prepare the application for deployment on the target Windows 11 tablet. This epic also covers building the Windows installer.
+Implement kiosk mode features (auto-start on boot, prevent system sleep, prevent alt-tab/taskbar access, fullscreen lock, hide cursor) and prepare the application for deployment on Windows 11 or Linux Mint 22+. This epic covers building the Windows installer and Linux packages (AppImage / .deb).
 
 **Dependencies:** Epic 02 (App shell). Epic 07 (Kiosk settings). Epic 01 (Packaging pipeline).
 
@@ -25,6 +25,11 @@ Implement kiosk mode features (auto-start on boot, prevent system sleep, prevent
   - File picker dialogs (for logo upload, gallery path) must be able to appear on top of the app.
   - The app remains fullscreen but allows OS dialogs to overlay.
 - A developer-only escape hatch exists: a keyboard shortcut (e.g., `Ctrl+Shift+Q`) exits the app entirely. This shortcut is only active when a development flag is set (not in production builds).
+
+**Platform implementation:**
+
+- **Windows:** Use Electron's `fullscreen: true` + `alwaysOnTop: true` window options. Enforce via `win.setFullScreen(true)` and `win.setAlwaysOnTop(true, 'screen-saver')` on focus loss.
+- **Linux:** Use Electron's built-in `kiosk: true` BrowserWindow option (`win.setKiosk(true)`). On X11/Wayland this takes exclusive fullscreen ownership, prevents window dragging/resizing, and suppresses the Cinnamon DE's compositor UI. This is the recommended approach — it avoids fragile X11 `XGrabKeyboard` calls and works across DEs.
 
 **Edge Cases:**
 
@@ -50,11 +55,16 @@ Implement kiosk mode features (auto-start on boot, prevent system sleep, prevent
 - The restrictions are lifted when the admin panel is open (to allow the admin to interact with the OS if needed for troubleshooting).
 - The restrictions are removed cleanly when the app exits (normal shutdown or crash).
 
+**Platform implementation:**
+
+- **Windows:** Use low-level keyboard hooks (Win32 `SetWindowsHookEx` with `WH_KEYBOARD_LL`) to intercept Alt-Tab, Windows key, Alt-F4, and Ctrl-Escape. Hide taskbar via `FindWindow("Shell_TrayWnd")` + `ShowWindow(SW_HIDE)`. Restore on exit.
+- **Linux:** Electron's `kiosk: true` (set in Story 12.1) already suppresses most DE-level shortcuts in Cinnamon. Use `globalShortcut.register` for any remaining combos that need explicit interception. There is no taskbar to hide — the Cinnamon panel is already excluded by kiosk fullscreen. Do **not** attempt `XGrabKeyboard`; it is fragile across desktop environments and Wayland is incompatible with X11 input grabs.
+
 **Edge Cases:**
 
-- If the app crashes without cleanup, a separate mechanism (or Windows restart) should restore taskbar visibility. Document this scenario for the admin.
-- Implementing low-level keyboard hooks may require specific OS APIs — the chosen framework must support this or a native addon is needed.
-- Some keyboard shortcut blocking may require running the app with appropriate permissions. Document any requirements.
+- If the app crashes without cleanup, a separate mechanism (or a device restart) should restore normal OS behavior. Document this scenario for the admin.
+- Implementing low-level keyboard hooks may require specific OS APIs or permissions. Document any requirements.
+- On Linux, `Ctrl+Alt+Delete` is handled by the login manager (not the DE) and cannot be blocked by the app — this is intentional and serves as the admin safety escape.
 
 ---
 
@@ -140,3 +150,31 @@ Implement kiosk mode features (auto-start on boot, prevent system sleep, prevent
   - Does NOT remove the settings file (preserves configuration).
 - The total installer size is documented in the project README.
 - The installer is tested on a clean Windows 11 installation.
+
+---
+
+### Story 12.7: Create Linux Package (AppImage + .deb)
+
+> As an admin deploying on Linux Mint, I want a ready-to-run package so that installation is straightforward and I don't need to build from source.
+
+**Acceptance Criteria:**
+
+- Running `npm run package:linux` produces two artifacts in `release/`:
+  - An **AppImage** (`.AppImage`): portable, no installation required — double-click to run. Useful for quick testing on any x64 Linux machine.
+  - A **Debian package** (`.deb`): installs the app to `/opt/Open Photobooth/`, creates a `.desktop` entry in `/usr/share/applications/`, and registers the app with the system launcher.
+- The `.deb` installs cleanly via `sudo dpkg -i open-photobooth-*.deb` on Linux Mint 22 (Ubuntu 24.04 base).
+- Uninstalling via `sudo apt remove open-photobooth`:
+  - Removes application files.
+  - Removes the system `.desktop` entry.
+  - Does **not** remove the photo gallery folder.
+  - Does **not** remove the settings file (`~/.config/OpenPhotobooth/`).
+- The AppImage runs without installation on a clean Linux Mint 22 machine (FUSE may need to be available; document this).
+- Bundled assets (music, sounds, fonts, default images) are included in both packages via `asarUnpack`.
+- The `.deb` artifact name follows the same convention as the Windows installer: `Open Photobooth-{version}-linux.deb`.
+- Both packages are tested on a clean Linux Mint 22 VM.
+
+**Notes:**
+
+- electron-builder handles `.deb` and `AppImage` generation natively — no custom packaging scripts are needed.
+- The Linux package is built from the same source as the Windows installer; no platform-specific source changes are required for packaging.
+- FUSE is required to run AppImages without extraction. On Linux Mint 22: `sudo apt install libfuse2`. Document this in the admin guide (Epic 13).

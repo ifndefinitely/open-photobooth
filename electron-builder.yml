@@ -20,6 +20,18 @@ win:
     - target: nsis
       arch:
         - x64
+linux:
+  executableName: open-photobooth
+  maintainer: Open Photobooth Contributors <ifndefinitely@github.com>
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  category: Utility
+  icon: build/icon.png
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true

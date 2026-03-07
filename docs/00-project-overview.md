@@ -6,20 +6,20 @@ Open Photobooth is a free and open-source, fully offline photobooth application.
 
 ## Goals
 
-1. **Primary:** Provide a turnkey, self-contained photobooth experience that runs on a Windows 11 tablet without requiring internet connectivity after initial installation.
+1. **Primary:** Provide a turnkey, self-contained photobooth experience that runs on a Windows 11 tablet or Linux Mint machine without requiring internet connectivity after initial installation.
 2. **Secondary:** Be configurable enough for different events through a hidden admin settings panel (appearance, hardware, audio, language).
 3. **Tertiary:** Be open source (AGPL-3.0) and maintainable so the community or the owner can extend it.
 
 ## Constraints
 
-| Constraint          | Detail                                                                                                |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| **Fully Offline**   | No network calls after installation. All assets (fonts, audio, images) must be bundled.               |
-| **Target Hardware** | Windows 11 tablet (primary), USB webcam (Razer Kiyo), USB printer (Canon SELPHY).                     |
-| **Kiosk Mode**      | Must lock down the device so casual users cannot exit the app, switch applications, or access the OS. |
-| **Two Languages**   | English and Dutch for user-facing UI. Admin UI in English only.                                       |
-| **Single User**     | The photobooth serves one user/group at a time in a linear flow.                                      |
-| **Simple UX**       | Designed for unskilled users — large buttons, minimal choices, clear visual feedback.                 |
+| Constraint          | Detail                                                                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Fully Offline**   | No network calls after installation. All assets (fonts, audio, images) must be bundled.                                                                                                           |
+| **Target Hardware** | Windows 11 tablet or Linux Mint 22+ (Cinnamon DE) machine, USB webcam (Razer Kiyo), USB printer (Canon SELPHY). On Linux, the Canon SELPHY requires the `printer-driver-gutenprint` CUPS package. |
+| **Kiosk Mode**      | Must lock down the device so casual users cannot exit the app, switch applications, or access the OS.                                                                                             |
+| **Two Languages**   | English and Dutch for user-facing UI. Admin UI in English only.                                                                                                                                   |
+| **Single User**     | The photobooth serves one user/group at a time in a linear flow.                                                                                                                                  |
+| **Simple UX**       | Designed for unskilled users — large buttons, minimal choices, clear visual feedback.                                                                                                             |
 
 ## User Personas
 
@@ -121,9 +121,9 @@ Open Photobooth is a free and open-source, fully offline photobooth application.
 | 09  | Audio System (Music & Sound Effects)      | 5       | Epic 02, 07     |
 | 10  | Internationalization (EN/NL)              | 4       | Epic 02, 07     |
 | 11  | Error Handling & Resilience               | 6       | Epic 02, 10     |
-| 12  | Kiosk Mode & Deployment                   | 6       | Epic 02, 07, 01 |
+| 12  | Kiosk Mode & Deployment                   | 7       | Epic 02, 07, 01 |
 | 13  | Final Polish, Testing & Integration       | 6       | All             |
-|     | **Total**                                 | **84**  |                 |
+|     | **Total**                                 | **85**  |                 |
 
 ## Recommended Implementation Order
 

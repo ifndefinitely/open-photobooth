@@ -55,6 +55,24 @@ function PinDialog({ onSuccess, onCancel }: PinDialogProps): React.JSX.Element {
     setPin((prev) => prev.slice(0, -1))
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      // Handle number keys 0-9
+      if (event.key >= '0' && event.key <= '9') {
+        event.preventDefault()
+        handleDigit(event.key)
+      }
+      // Handle Backspace
+      else if (event.key === 'Backspace') {
+        event.preventDefault()
+        handleBackspace()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleDigit, handleBackspace])
+
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'empty', '0', 'backspace']
 
   return (

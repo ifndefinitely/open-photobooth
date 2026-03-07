@@ -1,17 +1,40 @@
+import { useState } from 'react'
 import { useNavigationStore } from '@/stores/navigationStore'
-import styles from '@/styles/placeholder.module.css'
+import { ADMIN_SECTIONS } from './adminSections'
+import styles from './AdminScreen.module.css'
 
 function AdminScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
+  const [activeSectionId, setActiveSectionId] = useState(ADMIN_SECTIONS[0].id)
+
+  const activeSection = ADMIN_SECTIONS.find((s) => s.id === activeSectionId) ?? ADMIN_SECTIONS[0]
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Admin Panel</h1>
-      <p className={styles.subtitle}>Placeholder — admin settings will be added in Story 2.7</p>
-      <div className={styles.actions}>
-        <button className={styles.button} onClick={goHome}>
+      <div className={styles.header}>
+        <h1 className={styles.headerTitle}>Admin Settings</h1>
+        <button className={styles.exitButton} onClick={goHome}>
           Exit Admin
         </button>
+      </div>
+      <div className={styles.body}>
+        <nav className={styles.sidebar}>
+          {ADMIN_SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              className={`${styles.sidebarItem}${section.id === activeSectionId ? ` ${styles.sidebarItemActive}` : ''}`}
+              onClick={() => setActiveSectionId(section.id)}
+            >
+              {section.label}
+            </button>
+          ))}
+        </nav>
+        <main className={styles.content}>
+          <h2 className={styles.sectionTitle}>{activeSection.label}</h2>
+          <p className={styles.sectionPlaceholder}>
+            Settings for {activeSection.label} will be added in a future epic.
+          </p>
+        </main>
       </div>
     </div>
   )

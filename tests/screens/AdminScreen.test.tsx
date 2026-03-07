@@ -26,9 +26,8 @@ describe('AdminScreen', () => {
   it('switches content when a different section is clicked', () => {
     render(<AdminScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Webcam' }))
-    expect(
-      screen.getByText('Settings for Webcam will be added in a future epic.')
-    ).toBeInTheDocument()
+    // Webcam section now renders its own component with controls
+    expect(screen.getByLabelText('Camera')).toBeInTheDocument()
   })
 
   it('highlights the active section in the sidebar', () => {

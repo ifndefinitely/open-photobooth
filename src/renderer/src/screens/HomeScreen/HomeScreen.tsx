@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useAdminGesture } from '@/hooks/useAdminGesture'
 import PinDialog from '@/components/PinDialog/PinDialog'
+import CameraPreview from '@/components/CameraPreview/CameraPreview'
 import styles from './HomeScreen.module.css'
 
 function HomeScreen(): React.JSX.Element {
@@ -12,7 +13,7 @@ function HomeScreen(): React.JSX.Element {
   return (
     <div className={styles.container}>
       <div className={styles.adminGestureTarget} onClick={handleTap} aria-hidden="true" />
-      <div className={styles.preview}>Camera Preview</div>
+      <CameraPreview className={styles.preview} />
       <div className={styles.buttonArea}>
         <button className={styles.takePhotosButton} onClick={() => navigateTo('session')}>
           Take Photos

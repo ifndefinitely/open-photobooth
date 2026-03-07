@@ -8,9 +8,10 @@ describe('HomeScreen', () => {
     useNavigationStore.getState().reset()
   })
 
-  it('renders the camera preview placeholder', () => {
+  it('renders the camera preview', () => {
     render(<HomeScreen />)
-    expect(screen.getByText('Camera Preview')).toBeInTheDocument()
+    const video = document.querySelector('video')
+    expect(video).toBeInTheDocument()
   })
 
   it('renders the Take Photos button', () => {

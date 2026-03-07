@@ -30,10 +30,16 @@ function AdminScreen(): React.JSX.Element {
           ))}
         </nav>
         <main className={styles.content}>
-          <h2 className={styles.sectionTitle}>{activeSection.label}</h2>
-          <p className={styles.sectionPlaceholder}>
-            Settings for {activeSection.label} will be added in a future epic.
-          </p>
+          {activeSection.component ? (
+            <activeSection.component />
+          ) : (
+            <>
+              <h2 className={styles.sectionTitle}>{activeSection.label}</h2>
+              <p className={styles.sectionPlaceholder}>
+                Settings for {activeSection.label} will be added in a future epic.
+              </p>
+            </>
+          )}
         </main>
       </div>
     </div>

@@ -8,6 +8,7 @@ import PinSection from './sections/PinSection/PinSection'
 import KioskSection from './sections/KioskSection/KioskSection'
 import LanguageSection from './sections/LanguageSection/LanguageSection'
 import GallerySection from './sections/GallerySection/GallerySection'
+import AudioSection from './sections/AudioSection/AudioSection'
 
 export interface AdminSection {
   id: string
@@ -21,7 +22,7 @@ export const ADMIN_SECTIONS: readonly AdminSection[] = [
   { id: 'printer', label: 'Printer', component: PrinterSection },
   { id: 'photo-session', label: 'Photo Session', component: PhotoSessionSection },
   { id: 'filters', label: 'Filters', component: FilterSection },
-  { id: 'audio', label: 'Audio' },
+  { id: 'audio', label: 'Audio', component: AudioSection },
   { id: 'pin', label: 'PIN', component: PinSection },
   { id: 'gallery', label: 'Gallery', component: GallerySection },
   { id: 'kiosk', label: 'Kiosk', component: KioskSection },

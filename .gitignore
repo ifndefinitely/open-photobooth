@@ -48,3 +48,6 @@ vite.config.ts.timestamp-*
 
 # Pre-commit scans
 *precommit-scan.sh
+
+# Claude AI files
+.claude/

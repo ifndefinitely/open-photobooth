@@ -4,6 +4,8 @@ import { useSessionSettingsStore } from '@/stores/sessionSettingsStore'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useCameraStore } from '@/stores/cameraStore'
 import { useStripStore } from '@/stores/stripStore'
+import { useAppSettingsStore } from '@/stores/appSettingsStore'
+import { playSFX, SFX } from '@/services/audioService'
 
 /**
  * Orchestrates the entire photo session sequence:
@@ -59,15 +61,24 @@ export function useSessionSequence(): void {
     function startCountdown(): void {
       const { countdownDuration } = useSessionSettingsStore.getState()
       const { setPhase, setCountdownValue } = useSessionStore.getState()
+      const { audioCountdownBeep } = useAppSettingsStore.getState()
 
       let remaining = countdownDuration
       setPhase('countdown')
       setCountdownValue(remaining)
 
+      // Beep on the first displayed number
+      if (audioCountdownBeep) {
+        playSFX(remaining === 1 ? SFX.BEEP_FINAL : SFX.BEEP)
+      }
+
       const intervalId = safeInterval(() => {
         remaining -= 1
         if (remaining > 0) {
           useSessionStore.getState().setCountdownValue(remaining)
+          if (audioCountdownBeep) {
+            playSFX(remaining === 1 ? SFX.BEEP_FINAL : SFX.BEEP)
+          }
         } else {
           window.clearInterval(intervalId)
           timersRef.current.delete(intervalId)
@@ -80,8 +91,14 @@ export function useSessionSequence(): void {
     async function doCapture(): Promise<void> {
       const { setPhase, addPhoto, advancePhoto } = useSessionStore.getState()
       const { photoCount } = useSessionSettingsStore.getState()
+      const { audioShutterSound } = useAppSettingsStore.getState()
 
       setPhase('capture')
+
+      // Shutter click at the moment of capture (before the async frame grab)
+      if (audioShutterSound) {
+        playSFX(SFX.SHUTTER)
+      }
       try {
         const result = await useCameraStore.getState().captureFrame()
         if (!mountedRef.current) return

@@ -2,14 +2,8 @@ import { useEffect, useState } from 'react'
 import type { CaptureResult } from '@/services/cameraService'
 import { generateFilterThumbnail } from '@/services/filterService'
 import type { FilterType } from '@/stores/stripStore'
+import { useT } from '@/i18n'
 import styles from './FilterSelector.module.css'
-
-const FILTER_LABELS: Record<FilterType, string> = {
-  none: 'Original',
-  bw: 'B&W',
-  sepia: 'Sepia',
-  vintage: 'Vintage'
-}
 
 interface FilterSelectorProps {
   previewPhoto: CaptureResult
@@ -25,6 +19,9 @@ function FilterSelector({
   availableFilters
 }: FilterSelectorProps): React.JSX.Element {
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({})
+  const t = useT()
+
+  const filterLabel = (filter: FilterType): string => t(`filter.${filter}`)
 
   useEffect(() => {
     let cancelled = false
@@ -59,7 +56,7 @@ function FilterSelector({
             {thumbnails[filter] ? (
               <img
                 src={thumbnails[filter]}
-                alt={FILTER_LABELS[filter]}
+                alt={filterLabel(filter)}
                 className={styles.thumbnail}
                 draggable={false}
               />
@@ -67,7 +64,7 @@ function FilterSelector({
               <div className={styles.thumbnailPlaceholder} />
             )}
           </div>
-          <span className={styles.filterLabel}>{FILTER_LABELS[filter]}</span>
+          <span className={styles.filterLabel}>{filterLabel(filter)}</span>
         </button>
       ))}
     </div>

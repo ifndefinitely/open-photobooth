@@ -7,6 +7,7 @@ import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { useIdleTimeout } from '@/hooks/useIdleTimeout'
 import { useStripComposition } from '@/hooks/useStripComposition'
 import { useAutoSave } from '@/hooks/useAutoSave'
+import { useT } from '@/i18n'
 import ConfirmationDialog from '@/components/ConfirmationDialog/ConfirmationDialog'
 import IdleCountdown from '@/components/IdleCountdown/IdleCountdown'
 import StripPreview from '@/components/StripPreview/StripPreview'
@@ -38,6 +39,7 @@ function ReviewScreen(): React.JSX.Element {
   const [isCheckingPrinter, setIsCheckingPrinter] = useState(false)
   const [printerErrorDetail, setPrinterErrorDetail] = useState('')
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
+  const t = useT()
 
   const handlePrintPress = useCallback(async () => {
     if (!printerName) {
@@ -85,7 +87,7 @@ function ReviewScreen(): React.JSX.Element {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Review Your Photos</h1>
+      <h1 className={styles.title}>{t('review.title')}</h1>
 
       {showFilters && photos.length > 0 && (
         <FilterSelector
@@ -110,32 +112,32 @@ function ReviewScreen(): React.JSX.Element {
           onClick={handlePrintPress}
           disabled={isComposing || !!compositionError || isCheckingPrinter}
         >
-          {isCheckingPrinter ? 'Checking printer...' : 'Print'}
+          {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
         </button>
         <button className={styles.buttonSecondary} onClick={() => setConfirmAction('redo')}>
-          Redo
+          {t('review.redo')}
         </button>
         <button className={styles.buttonDanger} onClick={() => setConfirmAction('abort')}>
-          Start Over
+          {t('review.abort')}
         </button>
       </div>
 
       {confirmAction === 'redo' && (
         <ConfirmationDialog
-          title="Redo Photos?"
-          message="This will discard your current photos. Are you sure?"
-          confirmLabel="Redo"
-          cancelLabel="Cancel"
+          title={t('review.confirmRedo.title')}
+          message={t('review.confirmRedo.message')}
+          confirmLabel={t('review.confirmRedo.confirm')}
+          cancelLabel={t('review.confirmRedo.cancel')}
           onConfirm={() => navigateTo('session')}
           onCancel={() => setConfirmAction(null)}
         />
       )}
       {confirmAction === 'abort' && (
         <ConfirmationDialog
-          title="Start Over?"
-          message="This will discard your photos and return to the home screen. Are you sure?"
-          confirmLabel="Start Over"
-          cancelLabel="Cancel"
+          title={t('review.confirmAbort.title')}
+          message={t('review.confirmAbort.message')}
+          confirmLabel={t('review.confirmAbort.confirm')}
+          cancelLabel={t('review.confirmAbort.cancel')}
           variant="danger"
           onConfirm={() => navigateTo('home')}
           onCancel={() => setConfirmAction(null)}
@@ -143,10 +145,10 @@ function ReviewScreen(): React.JSX.Element {
       )}
       {confirmAction === 'print' && (
         <ConfirmationDialog
-          title="Print Your Photos?"
-          message="Your photo strip will be printed."
-          confirmLabel="Print"
-          cancelLabel="Cancel"
+          title={t('print.confirm.title')}
+          message={t('print.confirm.message')}
+          confirmLabel={t('print.confirm.confirm')}
+          cancelLabel={t('print.confirm.cancel')}
           onConfirm={() => {
             setConfirmAction(null)
             navigateTo('print')
@@ -156,13 +158,10 @@ function ReviewScreen(): React.JSX.Element {
       )}
       {confirmAction === 'printerError' && (
         <ConfirmationDialog
-          title="Printer Not Connected"
-          message={
-            printerErrorDetail ||
-            'Your photos could not be printed right now. Please contact the store owner for help.'
-          }
-          confirmLabel="Try Again"
-          cancelLabel="Back"
+          title={t('error.printerNotFound')}
+          message={printerErrorDetail || t('error.contactOwner')}
+          confirmLabel={t('error.tryAgain')}
+          cancelLabel={t('common.back')}
           variant="danger"
           onConfirm={() => {
             setConfirmAction(null)

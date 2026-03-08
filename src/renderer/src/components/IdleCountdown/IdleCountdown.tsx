@@ -1,3 +1,4 @@
+import { useT } from '@/i18n'
 import styles from './IdleCountdown.module.css'
 
 interface IdleCountdownProps {
@@ -5,7 +6,10 @@ interface IdleCountdownProps {
 }
 
 function IdleCountdown({ remainingSeconds }: IdleCountdownProps): React.JSX.Element {
-  return <div className={styles.countdown}>Returning to home in {remainingSeconds}s...</div>
+  const t = useT()
+  return (
+    <div className={styles.countdown}>{t('idle.returning', { seconds: remainingSeconds })}</div>
+  )
 }
 
 export default IdleCountdown

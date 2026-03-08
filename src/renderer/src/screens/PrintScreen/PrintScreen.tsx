@@ -3,6 +3,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useStripStore } from '@/stores/stripStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { usePrintJob } from '@/hooks/usePrintJob'
+import { useT } from '@/i18n'
 import styles from './PrintScreen.module.css'
 
 const LONG_WAIT_THRESHOLD_MS = 60_000
@@ -15,6 +16,7 @@ function PrintScreen(): React.JSX.Element {
 
   const { status, error, retry } = usePrintJob()
   const [showLongWait, setShowLongWait] = useState(false)
+  const t = useT()
 
   // Show secondary message after 60 seconds of printing
   useEffect(() => {
@@ -38,8 +40,8 @@ function PrintScreen(): React.JSX.Element {
           <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
         )}
         <div className={styles.spinner} />
-        <p className={styles.message}>Printing your photos...</p>
-        {showLongWait && <p className={styles.secondaryMessage}>Still printing, please wait...</p>}
+        <p className={styles.message}>{t('print.printing')}</p>
+        {showLongWait && <p className={styles.secondaryMessage}>{t('print.stillPrinting')}</p>}
       </div>
     )
   }
@@ -51,7 +53,7 @@ function PrintScreen(): React.JSX.Element {
         {stripResult?.dataUrl && (
           <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
         )}
-        <p className={styles.message}>Print sent!</p>
+        <p className={styles.message}>{t('print.success')}</p>
       </div>
     )
   }
@@ -60,12 +62,11 @@ function PrintScreen(): React.JSX.Element {
   return (
     <div className={styles.container}>
       <div className={styles.errorContainer}>
-        <h1 className={styles.errorTitle}>Printing Failed</h1>
-        <p className={styles.errorMessage}>Your photos could not be printed.</p>
-        <p className={styles.errorCta}>Please contact the store owner for help.</p>
+        <h1 className={styles.errorTitle}>{t('error.title')}</h1>
+        <p className={styles.errorMessage}>{t('error.printFailed')}</p>
 
         <details className={styles.errorDetails}>
-          <summary className={styles.errorDetailsSummary}>Debug details</summary>
+          <summary className={styles.errorDetailsSummary}>{t('error.debugDetails')}</summary>
           <div className={styles.errorDetailsContent}>
             {`Error: ${error}\nPrinter: ${printerName || '(none)'}\nPaper size: ${paperSize}\nTime: ${new Date().toLocaleString()}`}
           </div>
@@ -73,10 +74,10 @@ function PrintScreen(): React.JSX.Element {
 
         <div className={styles.errorActions}>
           <button className={styles.button} onClick={retry}>
-            Try Again
+            {t('error.tryAgain')}
           </button>
           <button className={styles.buttonSecondary} onClick={() => navigateTo('review')}>
-            Back
+            {t('common.back')}
           </button>
         </div>
       </div>

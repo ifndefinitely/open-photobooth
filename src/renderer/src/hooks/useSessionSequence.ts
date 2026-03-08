@@ -6,6 +6,7 @@ import { useCameraStore } from '@/stores/cameraStore'
 import { useStripStore } from '@/stores/stripStore'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import { playSFX, SFX } from '@/services/audioService'
+import { t } from '@/i18n'
 
 /**
  * Orchestrates the entire photo session sequence:
@@ -156,7 +157,7 @@ export function useSessionSequence(): void {
           .join('\n')
 
         useSessionStore.getState().setLastError({
-          message: 'Camera disconnected. Please contact the event host.',
+          message: t('error.cameraDisconnected'),
           details: details || undefined
         })
 

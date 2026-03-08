@@ -1,0 +1,57 @@
+{
+  "home.takePhotos": "Maak Foto's",
+  "home.eventName": "{eventName}",
+
+  "session.getReady": "Maak je klaar!",
+  "session.countdown": "{count}",
+  "session.photoProgress": "Foto {current} van {total}",
+
+  "review.title": "Jouw Foto's",
+  "review.checkingPrinter": "Printer controleren...",
+  "review.print": "Afdrukken",
+  "review.redo": "Opnieuw",
+  "review.abort": "Opnieuw Beginnen",
+
+  "review.confirmRedo.title": "Foto's opnieuw maken?",
+  "review.confirmRedo.message": "Je huidige foto's worden verwijderd en er worden nieuwe gemaakt. Weet je het zeker?",
+  "review.confirmRedo.confirm": "Ja, opnieuw",
+  "review.confirmRedo.cancel": "Nee, bewaar foto's",
+
+  "review.confirmAbort.title": "Opnieuw beginnen?",
+  "review.confirmAbort.message": "Je foto's worden verwijderd en je keert terug naar het startscherm. Weet je het zeker?",
+  "review.confirmAbort.confirm": "Ja, opnieuw beginnen",
+  "review.confirmAbort.cancel": "Nee, bewaar foto's",
+
+  "print.confirm.title": "Foto's afdrukken?",
+  "print.confirm.message": "Je fotostrip wordt afgedrukt.",
+  "print.confirm.confirm": "Afdrukken",
+  "print.confirm.cancel": "Annuleren",
+
+  "print.printing": "Bezig met afdrukken...",
+  "print.stillPrinting": "Nog even geduld, we zijn nog aan het afdrukken...",
+  "print.success": "Afdruk verzonden!",
+
+  "thankyou.title": "Geniet van je foto's!",
+  "thankyou.subtitle": "Bedankt voor je bezoek aan onze photobooth!",
+  "thankyou.done": "Klaar",
+
+  "error.title": "Er is iets misgegaan",
+  "error.cameraDisconnected": "De camera is niet aangesloten. Neem contact op met de winkeleigenaar.",
+  "error.cameraInUse": "De camera wordt door een andere applicatie gebruikt.",
+  "error.printerNotFound": "De printer is niet aangesloten. Neem contact op met de winkeleigenaar.",
+  "error.printFailed": "Het afdrukken is mislukt. Probeer het opnieuw of neem contact op met de winkeleigenaar.",
+  "error.generic": "Er is een onverwachte fout opgetreden. Neem contact op met de winkeleigenaar.",
+  "error.contactOwner": "Neem contact op met de winkeleigenaar voor hulp.",
+  "error.debugDetails": "Technische details",
+  "error.tryAgain": "Opnieuw proberen",
+  "error.backToHome": "Terug naar start",
+
+  "filter.none": "Origineel",
+  "filter.bw": "Zwart-wit",
+  "filter.sepia": "Sepia",
+  "filter.vintage": "Vintage",
+
+  "idle.returning": "Terug naar start over {seconds}s...",
+
+  "common.back": "Terug"
+}

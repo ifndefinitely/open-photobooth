@@ -1,6 +1,7 @@
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useStripStore } from '@/stores/stripStore'
 import { useIdleTimeout } from '@/hooks/useIdleTimeout'
+import { useT } from '@/i18n'
 import IdleCountdown from '@/components/IdleCountdown/IdleCountdown'
 import styles from './ThankYouScreen.module.css'
 
@@ -8,18 +9,19 @@ function ThankYouScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
   const stripResult = useStripStore((s) => s.stripResult)
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
+  const t = useT()
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Enjoy Your Photos!</h1>
-      <p className={styles.subtitle}>Thank you for visiting our photobooth!</p>
+      <h1 className={styles.title}>{t('thankyou.title')}</h1>
+      <p className={styles.subtitle}>{t('thankyou.subtitle')}</p>
 
       {stripResult?.dataUrl && (
         <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
       )}
 
       <button className={styles.doneButton} onClick={goHome}>
-        Done
+        {t('thankyou.done')}
       </button>
 
       {remainingSeconds !== null && <IdleCountdown remainingSeconds={remainingSeconds} />}

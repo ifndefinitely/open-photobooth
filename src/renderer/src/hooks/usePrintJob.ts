@@ -1,6 +1,7 @@
 import { useReducer, useEffect, useCallback } from 'react'
 import { useStripStore } from '@/stores/stripStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
+import { t } from '@/i18n'
 
 export type PrintStatus = 'idle' | 'printing' | 'success' | 'error'
 
@@ -47,15 +48,12 @@ export function usePrintJob(): PrintJobResult {
 
     const imageDataUrl = printSheetResult?.dataUrl
     if (!imageDataUrl) {
-      dispatch({ type: 'error', error: 'No print sheet available. Please go back and try again.' })
+      dispatch({ type: 'error', error: t('error.printFailed') })
       return
     }
 
     if (!printerName) {
-      dispatch({
-        type: 'error',
-        error: 'No printer selected. Please configure a printer in Admin Settings.'
-      })
+      dispatch({ type: 'error', error: t('error.printerNotFound') })
       return
     }
 

@@ -6,6 +6,7 @@ import { useStripSettingsStore } from '@/stores/stripSettingsStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { useIdleTimeout } from '@/hooks/useIdleTimeout'
 import { useStripComposition } from '@/hooks/useStripComposition'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import ConfirmationDialog from '@/components/ConfirmationDialog/ConfirmationDialog'
 import IdleCountdown from '@/components/IdleCountdown/IdleCountdown'
 import StripPreview from '@/components/StripPreview/StripPreview'
@@ -66,6 +67,9 @@ function ReviewScreen(): React.JSX.Element {
 
   // Orchestrate the composition pipeline
   useStripComposition()
+
+  // Auto-save photos and strips to disk (fire-and-forget)
+  useAutoSave()
 
   // Build list of available filters based on admin settings
   const availableFilters = useMemo(() => {

@@ -43,9 +43,64 @@ export interface SettingsAPI {
   selectDirectory: (options?: { title?: string }) => Promise<string | null>
 }
 
+export interface SessionSummary {
+  id: string
+  folderPath: string
+  timestamp: string
+  photoCount: number
+  hasStrip: boolean
+  thumbnailDataUrl: string
+}
+
+export interface SessionDetail {
+  id: string
+  folderPath: string
+  timestamp: string
+  photoCount: number
+  filter: string
+  photos: Array<{ filename: string; dataUrl: string }>
+  stripDataUrl: string | null
+  printSheetDataUrl: string | null
+  metadata: Record<string, unknown>
+}
+
+export interface SaveSessionResult {
+  success: boolean
+  sessionFolder: string
+  error?: string
+}
+
+export interface ValidateDirectoryResult {
+  valid: boolean
+  error?: string
+}
+
+export interface DeleteAllResult {
+  deleted: number
+  errors: string[]
+}
+
+export interface GalleryAPI {
+  saveSession: (data: {
+    photos: string[]
+    timestamp: string
+    photoCount: number
+    filter: string
+  }) => Promise<SaveSessionResult>
+  saveStrip: (sessionFolder: string, stripBase64: string, printSheetBase64: string) => Promise<void>
+  listSessions: () => Promise<SessionSummary[]>
+  getSessionDetail: (sessionId: string) => Promise<SessionDetail | null>
+  deleteSession: (sessionId: string) => Promise<void>
+  deleteAllSessions: () => Promise<DeleteAllResult>
+  validateDirectory: (dirPath: string) => Promise<ValidateDirectoryResult>
+  openInExplorer: () => Promise<{ success: boolean; error?: string }>
+  getDefaultPath: () => Promise<string>
+}
+
 export interface API {
   printer: PrinterAPI
   settings: SettingsAPI
+  gallery: GalleryAPI
 }
 
 declare global {

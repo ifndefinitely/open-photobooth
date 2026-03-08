@@ -21,6 +21,33 @@ const api = {
     }): Promise<string | null> => ipcRenderer.invoke('settings:selectFile', options),
     selectDirectory: (options?: { title?: string }): Promise<string | null> =>
       ipcRenderer.invoke('settings:selectDirectory', options)
+  },
+  gallery: {
+    saveSession: (data: {
+      photos: string[]
+      timestamp: string
+      photoCount: number
+      filter: string
+    }): Promise<{ success: boolean; sessionFolder: string; error?: string }> =>
+      ipcRenderer.invoke('gallery:save-session', data),
+    saveStrip: (
+      sessionFolder: string,
+      stripBase64: string,
+      printSheetBase64: string
+    ): Promise<void> =>
+      ipcRenderer.invoke('gallery:save-strip', sessionFolder, stripBase64, printSheetBase64),
+    listSessions: (): Promise<unknown[]> => ipcRenderer.invoke('gallery:list-sessions'),
+    getSessionDetail: (sessionId: string): Promise<unknown> =>
+      ipcRenderer.invoke('gallery:get-session-detail', sessionId),
+    deleteSession: (sessionId: string): Promise<void> =>
+      ipcRenderer.invoke('gallery:delete-session', sessionId),
+    deleteAllSessions: (): Promise<{ deleted: number; errors: string[] }> =>
+      ipcRenderer.invoke('gallery:delete-all-sessions'),
+    validateDirectory: (dirPath: string): Promise<{ valid: boolean; error?: string }> =>
+      ipcRenderer.invoke('gallery:validate-directory', dirPath),
+    openInExplorer: (): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('gallery:open-in-explorer'),
+    getDefaultPath: (): Promise<string> => ipcRenderer.invoke('gallery:get-default-path')
   }
 }
 

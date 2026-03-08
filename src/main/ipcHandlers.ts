@@ -2,6 +2,8 @@ import { BrowserWindow, dialog, ipcMain } from 'electron'
 import { getPrinters, checkPrinterAvailability, print } from './printerService'
 import type { PrintOptions } from './printerService'
 import * as settingsService from './settingsService'
+import * as storageService from './storageService'
+import type { SaveSessionData } from './storageService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -72,5 +74,46 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
       return null
     }
     return result.filePaths[0]
+  })
+
+  // ── Gallery ──
+
+  ipcMain.handle('gallery:save-session', async (_event, data: SaveSessionData) => {
+    return storageService.saveSession(data)
+  })
+
+  ipcMain.handle(
+    'gallery:save-strip',
+    async (_event, sessionFolder: string, stripBase64: string, printSheetBase64: string) => {
+      return storageService.saveStrip(sessionFolder, stripBase64, printSheetBase64)
+    }
+  )
+
+  ipcMain.handle('gallery:list-sessions', async () => {
+    return storageService.listSessions()
+  })
+
+  ipcMain.handle('gallery:get-session-detail', async (_event, sessionId: string) => {
+    return storageService.getSessionDetail(sessionId)
+  })
+
+  ipcMain.handle('gallery:delete-session', async (_event, sessionId: string) => {
+    return storageService.deleteSession(sessionId)
+  })
+
+  ipcMain.handle('gallery:delete-all-sessions', async () => {
+    return storageService.deleteAllSessions()
+  })
+
+  ipcMain.handle('gallery:validate-directory', async (_event, dirPath: string) => {
+    return storageService.validateDirectory(dirPath)
+  })
+
+  ipcMain.handle('gallery:open-in-explorer', async () => {
+    return storageService.openInFileExplorer()
+  })
+
+  ipcMain.handle('gallery:get-default-path', () => {
+    return storageService.getDefaultPath()
   })
 }

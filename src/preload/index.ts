@@ -8,6 +8,19 @@ const api = {
     checkAvailability: (printerName: string): Promise<unknown> =>
       ipcRenderer.invoke('printer:check-availability', printerName),
     print: (options: unknown): Promise<unknown> => ipcRenderer.invoke('printer:print', options)
+  },
+  settings: {
+    get: (key: string): Promise<unknown> => ipcRenderer.invoke('settings:get', key),
+    set: (key: string, value: unknown): Promise<void> =>
+      ipcRenderer.invoke('settings:set', key, value),
+    getAll: (): Promise<Record<string, unknown>> => ipcRenderer.invoke('settings:getAll'),
+    reset: (key: string): Promise<void> => ipcRenderer.invoke('settings:reset', key),
+    resetAll: (): Promise<void> => ipcRenderer.invoke('settings:resetAll'),
+    selectFile: (options?: {
+      filters?: Array<{ name: string; extensions: string[] }>
+    }): Promise<string | null> => ipcRenderer.invoke('settings:selectFile', options),
+    selectDirectory: (options?: { title?: string }): Promise<string | null> =>
+      ipcRenderer.invoke('settings:selectDirectory', options)
   }
 }
 

@@ -1,0 +1,49 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.input {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  min-height: var(--touch-target-min);
+}
+
+.input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+.inputError {
+  border-color: #d32f2f;
+}
+
+.description {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.error {
+  font-size: 0.8rem;
+  color: #d32f2f;
+  margin: 0;
+  line-height: 1.3;
+}

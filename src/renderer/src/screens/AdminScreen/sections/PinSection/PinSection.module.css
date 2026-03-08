@@ -1,0 +1,111 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 320px;
+}
+
+.success {
+  font-size: 0.875rem;
+  color: #2e7d32;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.changePinButton {
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+  touch-action: manipulation;
+  transition:
+    transform 0.1s ease,
+    background-color 0.1s ease;
+}
+
+.changePinButton:active {
+  transform: scale(0.97);
+  background: var(--color-accent-active);
+}
+
+.resetButton {
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #d32f2f;
+  background: transparent;
+  border: 1px solid #d32f2f;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+  touch-action: manipulation;
+}
+
+.resetButton:hover {
+  background: rgba(211, 47, 47, 0.05);
+}
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.confirmText {
+  font-size: 0.875rem;
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.confirmYes {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  background: #d32f2f;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+}
+
+.confirmNo {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555;
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+}

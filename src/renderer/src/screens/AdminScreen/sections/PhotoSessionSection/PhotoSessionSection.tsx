@@ -1,5 +1,13 @@
 import { useSessionSettingsStore } from '@/stores/sessionSettingsStore'
+import { NumberStepper, Dropdown, Toggle } from '@/components/admin'
 import styles from './PhotoSessionSection.module.css'
+
+const COUNTDOWN_OPTIONS = [
+  { label: '1 second', value: '1' },
+  { label: '2 seconds', value: '2' },
+  { label: '3 seconds', value: '3' },
+  { label: '5 seconds', value: '5' }
+]
 
 function PhotoSessionSection(): React.JSX.Element {
   const photoCount = useSessionSettingsStore((s) => s.photoCount)
@@ -14,54 +22,24 @@ function PhotoSessionSection(): React.JSX.Element {
       <h2 className={styles.title}>Photo Session</h2>
 
       <div className={styles.controls}>
-        {/* Number of photos per session */}
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="session-photo-count">
-            Number of photos
-          </label>
-          <select
-            id="session-photo-count"
-            className={styles.select}
-            value={photoCount}
-            onChange={(e) => setPhotoCount(Number(e.target.value))}
-          >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
+        <NumberStepper
+          label="Number of photos"
+          value={photoCount}
+          onChange={setPhotoCount}
+          min={1}
+          max={6}
+        />
 
-        {/* Countdown duration */}
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="session-countdown-duration">
-            Countdown duration (seconds)
-          </label>
-          <select
-            id="session-countdown-duration"
-            className={styles.select}
-            value={countdownDuration}
-            onChange={(e) => setCountdownDuration(Number(e.target.value))}
-          >
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-            <option value={5}>5</option>
-          </select>
-        </div>
+        <Dropdown
+          label="Countdown duration"
+          value={String(countdownDuration)}
+          onChange={(v) => setCountdownDuration(Number(v))}
+          options={COUNTDOWN_OPTIONS}
+        />
 
-        {/* Flash effect toggle */}
-        <div className={styles.field}>
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={flashEffect}
-              onChange={(e) => setFlashEffect(e.target.checked)}
-            />
-            Flash effect on capture
-          </label>
-        </div>
+        <Toggle label="Flash effect on capture" value={flashEffect} onChange={setFlashEffect} />
+
+        <p className={styles.note}>Changes will take effect for the next photo session.</p>
       </div>
     </div>
   )

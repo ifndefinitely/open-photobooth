@@ -1,0 +1,81 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: fit-content;
+}
+
+.stepButton {
+  width: 48px;
+  min-height: var(--touch-target-min);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+  touch-action: manipulation;
+}
+
+.stepButton:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.stepButton:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.stepButton:hover:not(:disabled) {
+  background: #ddd;
+}
+
+.stepButton:active:not(:disabled) {
+  background: #ccc;
+}
+
+.stepButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.value {
+  min-width: 48px;
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  background: #fff;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.description {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.3;
+}

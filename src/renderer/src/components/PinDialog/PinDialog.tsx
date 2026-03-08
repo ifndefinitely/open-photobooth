@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import styles from './PinDialog.module.css'
-
-const DEFAULT_PIN = '0000'
 const MAX_ATTEMPTS = 3
 const ERROR_DISPLAY_MS = 500
 
@@ -11,6 +10,7 @@ interface PinDialogProps {
 }
 
 function PinDialog({ onSuccess, onCancel }: PinDialogProps): React.JSX.Element {
+  const storedPin = useAppSettingsStore((s) => s.pinCode)
   const [pin, setPin] = useState('')
   const [error, setError] = useState<string | null>(null)
   const failureCountRef = useRef(0)
@@ -27,7 +27,7 @@ function PinDialog({ onSuccess, onCancel }: PinDialogProps): React.JSX.Element {
   useEffect(() => {
     if (pin.length !== 4) return
 
-    if (pin === DEFAULT_PIN) {
+    if (pin === storedPin) {
       onSuccess()
     } else {
       failureCountRef.current += 1
@@ -43,7 +43,7 @@ function PinDialog({ onSuccess, onCancel }: PinDialogProps): React.JSX.Element {
         }, ERROR_DISPLAY_MS)
       }
     }
-  }, [pin, onSuccess, onCancel])
+  }, [pin, storedPin, onSuccess, onCancel])
 
   const handleDigit = useCallback((digit: string) => {
     setError(null)

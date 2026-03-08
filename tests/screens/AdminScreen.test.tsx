@@ -18,9 +18,8 @@ describe('AdminScreen', () => {
 
   it('shows Appearance section as active by default', () => {
     render(<AdminScreen />)
-    expect(
-      screen.getByText('Settings for Appearance will be added in a future epic.')
-    ).toBeInTheDocument()
+    // Appearance section now renders its own component with the "Branding" section header
+    expect(screen.getByText('Branding')).toBeInTheDocument()
   })
 
   it('switches content when a different section is clicked', () => {

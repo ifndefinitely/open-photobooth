@@ -37,15 +37,20 @@ function KioskSection(): React.JSX.Element {
     <div className={styles.section}>
       <h2 className={styles.title}>Kiosk</h2>
 
-      <div className={styles.warning}>
-        Changes to Auto-start and Prevent Alt-Tab take effect after restarting the app.
-      </div>
-
       <div className={styles.controls}>
         <Toggle
           label="Auto-start on boot"
           value={kioskAutoStart}
-          onChange={setKioskAutoStart}
+          onChange={(enabled) => {
+            if (enabled) {
+              const confirmed = window.confirm(
+                'The app will start automatically when this device boots. ' +
+                  'Make sure all settings are configured correctly before enabling this.'
+              )
+              if (!confirmed) return
+            }
+            setKioskAutoStart(enabled)
+          }}
           description="When enabled, the app will start automatically when this device boots up."
         />
 

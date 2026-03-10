@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { ADMIN_SECTIONS } from './adminSections'
 import styles from './AdminScreen.module.css'
@@ -6,6 +6,14 @@ import styles from './AdminScreen.module.css'
 function AdminScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
   const [activeSectionId, setActiveSectionId] = useState(ADMIN_SECTIONS[0].id)
+
+  // Notify kiosk service that admin panel is open (lifts restrictions)
+  useEffect(() => {
+    window.api.kiosk.setAdminPanelOpen(true)
+    return () => {
+      window.api.kiosk.setAdminPanelOpen(false)
+    }
+  }, [])
 
   const activeSection = ADMIN_SECTIONS.find((s) => s.id === activeSectionId) ?? ADMIN_SECTIONS[0]
 

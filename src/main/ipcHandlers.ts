@@ -6,6 +6,7 @@ import * as storageService from './storageService'
 import type { SaveSessionData } from './storageService'
 import * as loggingService from './loggingService'
 import type { LogLevel } from './loggingService'
+import * as kioskService from './kioskService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -42,6 +43,11 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('settings:set', (_event, key: string, value: unknown) => {
     settingsService.set(key, value)
+
+    // Forward kiosk setting changes so kioskService can react at runtime
+    if (key.startsWith('kiosk.')) {
+      kioskService.updateSetting(key)
+    }
   })
 
   ipcMain.handle('settings:getAll', () => {
@@ -117,6 +123,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('gallery:get-default-path', () => {
     return storageService.getDefaultPath()
+  })
+
+  // ── Kiosk ──
+
+  ipcMain.handle('kiosk:set-admin-panel-open', (_event, open: boolean) => {
+    kioskService.setAdminPanelOpen(open)
   })
 
   // ── Logging ──

@@ -102,10 +102,15 @@ export interface LoggingAPI {
   getLogPath: () => Promise<string>
 }
 
+export interface KioskAPI {
+  setAdminPanelOpen: (open: boolean) => Promise<void>
+}
+
 export interface API {
   printer: PrinterAPI
   settings: SettingsAPI
   logging: LoggingAPI
+  kiosk: KioskAPI
   gallery: GalleryAPI
 }
 

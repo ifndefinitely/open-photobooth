@@ -27,6 +27,10 @@ const api = {
       ipcRenderer.invoke('logging:log', level, source, message),
     getLogPath: (): Promise<string> => ipcRenderer.invoke('logging:getLogPath')
   },
+  kiosk: {
+    setAdminPanelOpen: (open: boolean): Promise<void> =>
+      ipcRenderer.invoke('kiosk:set-admin-panel-open', open)
+  },
   gallery: {
     saveSession: (data: {
       photos: string[]

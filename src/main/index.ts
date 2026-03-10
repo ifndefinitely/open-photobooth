@@ -5,17 +5,17 @@ import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipcHandlers'
 import * as settingsService from './settingsService'
 import * as loggingService from './loggingService'
+import * as kioskService from './kioskService'
 
 function createWindow(): BrowserWindow {
   const isDev = is.dev
   const isLinux = process.platform === 'linux'
 
+  // Start maximized (not fullscreen). The kioskService will apply fullscreen
+  // based on the kiosk.fullscreenLock setting after init.
+  // In dev on Linux, use a smaller windowed mode for easier DevTools access.
   const mainWindow = new BrowserWindow({
-    // In dev on Linux, use large windowed mode instead of true fullscreen
-    // (fullscreen is painful for dev — hard to access DevTools, terminal, etc.)
-    ...(isDev && isLinux
-      ? { width: 1280, height: 800 }
-      : { fullscreen: true, fullscreenable: true }),
+    ...(isDev && isLinux ? { width: 1280, height: 800 } : { width: 1920, height: 1080 }),
     frame: false,
     show: !isDev, // Show immediately in production, wait in dev (for DevTools)
     autoHideMenuBar: true,
@@ -27,6 +27,11 @@ function createWindow(): BrowserWindow {
       autoplayPolicy: 'no-user-gesture-required'
     }
   })
+
+  // Maximize the window (not fullscreen — kioskService handles that)
+  if (!(isDev && isLinux)) {
+    mainWindow.maximize()
+  }
 
   // In dev, wait for content before showing (so DevTools can attach cleanly)
   if (isDev) {
@@ -74,6 +79,7 @@ app.whenReady().then(async () => {
 
   const mainWindow = createWindow()
   registerIpcHandlers(mainWindow)
+  kioskService.init(mainWindow)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -86,9 +92,10 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Flush pending settings writes and clean up global shortcuts before quitting
+// Flush pending settings writes and clean up before quitting
 app.on('will-quit', () => {
   loggingService.log('INFO', 'App', 'Application shutting down')
+  kioskService.destroy()
   settingsService.flush()
   globalShortcut.unregisterAll()
 })

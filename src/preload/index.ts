@@ -22,6 +22,11 @@ const api = {
     selectDirectory: (options?: { title?: string }): Promise<string | null> =>
       ipcRenderer.invoke('settings:selectDirectory', options)
   },
+  logging: {
+    log: (level: string, source: string, message: string): Promise<void> =>
+      ipcRenderer.invoke('logging:log', level, source, message),
+    getLogPath: (): Promise<string> => ipcRenderer.invoke('logging:getLogPath')
+  },
   gallery: {
     saveSession: (data: {
       photos: string[]

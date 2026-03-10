@@ -97,9 +97,15 @@ export interface GalleryAPI {
   getDefaultPath: () => Promise<string>
 }
 
+export interface LoggingAPI {
+  log: (level: string, source: string, message: string) => Promise<void>
+  getLogPath: () => Promise<string>
+}
+
 export interface API {
   printer: PrinterAPI
   settings: SettingsAPI
+  logging: LoggingAPI
   gallery: GalleryAPI
 }
 

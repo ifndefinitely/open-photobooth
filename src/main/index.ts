@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipcHandlers'
 import * as settingsService from './settingsService'
+import * as loggingService from './loggingService'
 
 function createWindow(): BrowserWindow {
   const isDev = is.dev
@@ -50,8 +51,10 @@ function createWindow(): BrowserWindow {
 }
 
 app.whenReady().then(async () => {
-  // Initialize settings persistence before anything else
-  await settingsService.init(app.getPath('userData'))
+  // Initialize core services before anything else
+  const userDataPath = app.getPath('userData')
+  await loggingService.init(userDataPath)
+  await settingsService.init(userDataPath)
 
   electronApp.setAppUserModelId('com.openphotobooth.app')
 
@@ -85,6 +88,7 @@ app.on('window-all-closed', () => {
 
 // Flush pending settings writes and clean up global shortcuts before quitting
 app.on('will-quit', () => {
+  loggingService.log('INFO', 'App', 'Application shutting down')
   settingsService.flush()
   globalShortcut.unregisterAll()
 })

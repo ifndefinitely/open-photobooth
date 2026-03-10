@@ -1,4 +1,5 @@
 import { BrowserWindow, WebContentsPrintOptions } from 'electron'
+import * as loggingService from './loggingService'
 
 export interface PrinterInfo {
   name: string
@@ -31,6 +32,7 @@ export interface PrintResult {
  */
 export async function getPrinters(mainWindow: BrowserWindow): Promise<PrinterInfo[]> {
   const printers = await mainWindow.webContents.getPrintersAsync()
+  loggingService.log('INFO', 'Printer', `Enumerated ${printers.length} printer(s)`)
   return printers.map((p) => ({
     name: p.name,
     displayName: p.displayName || p.name,
@@ -53,11 +55,13 @@ export async function checkPrinterAvailability(
     const printer = printers.find((p) => p.name === printerName)
 
     if (!printer) {
+      loggingService.log('WARN', 'Printer', `Printer "${printerName}" not found`)
       return { available: false, status: 'not_found' }
     }
 
     // Electron doesn't expose a reliable status field — if the printer is in
     // the list, its drivers are loaded and it should be reachable.
+    loggingService.log('INFO', 'Printer', `Printer "${printerName}" is available`)
     return { available: true, status: 'ready' }
   }
 
@@ -171,11 +175,22 @@ export async function print(options: PrintOptions): Promise<PrintResult> {
     }
 
     // Send the print job
+    loggingService.log(
+      'INFO',
+      'Printer',
+      `Sending print job to "${printerName}" (paper: ${paperSize}, copies: ${copies})`
+    )
     const result = await new Promise<PrintResult>((resolve) => {
       printWindow!.webContents.print(printOptions, (success, failureReason) => {
         if (success) {
+          loggingService.log('INFO', 'Printer', `Print job completed on "${printerName}"`)
           resolve({ success: true })
         } else {
+          loggingService.log(
+            'ERROR',
+            'Printer',
+            `Print job failed on "${printerName}": ${failureReason || 'Unknown'}`
+          )
           resolve({ success: false, error: failureReason || 'Unknown print error' })
         }
       })
@@ -183,9 +198,11 @@ export async function print(options: PrintOptions): Promise<PrintResult> {
 
     return result
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    loggingService.log('ERROR', 'Printer', `Print error: ${msg}`)
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
+      error: msg
     }
   } finally {
     if (printWindow && !printWindow.isDestroyed()) {

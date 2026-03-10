@@ -1,7 +1,23 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useCameraStore } from '@/stores/cameraStore'
 import { buildCssFilter } from '@/services/cameraService'
+import { useT } from '@/i18n'
 import styles from './CameraPreview.module.css'
+
+/** Map internal camera error strings to i18n keys. */
+function getErrorI18nKey(error: string): string | null {
+  if (
+    error === 'No cameras detected' ||
+    error === 'Camera not found' ||
+    error === 'Camera disconnected'
+  ) {
+    return 'error.cameraDisconnected'
+  }
+  if (error === 'Camera is in use by another application') {
+    return 'error.cameraInUse'
+  }
+  return null // Unknown error — show raw string
+}
 
 interface CameraPreviewProps {
   className?: string
@@ -11,6 +27,7 @@ function CameraPreview({ className }: CameraPreviewProps): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement>(null)
   const stream = useCameraStore((s) => s.stream)
   const error = useCameraStore((s) => s.error)
+  const t = useT()
   const isLoading = useCameraStore((s) => s.isLoading)
   const mirrorHorizontal = useCameraStore((s) => s.settings.mirrorHorizontal)
   const flipVertical = useCameraStore((s) => s.settings.flipVertical)
@@ -63,7 +80,9 @@ function CameraPreview({ className }: CameraPreviewProps): React.JSX.Element {
       )}
       {error && !isLoading && (
         <div className={styles.overlay}>
-          <span className={styles.errorText}>{error}</span>
+          <span className={styles.errorText}>
+            {getErrorI18nKey(error) ? t(getErrorI18nKey(error)!) : error}
+          </span>
         </div>
       )}
     </div>

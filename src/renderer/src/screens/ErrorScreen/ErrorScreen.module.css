@@ -1,0 +1,104 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 48px;
+  text-align: center;
+  gap: 24px;
+}
+
+.icon {
+  width: 80px;
+  height: 80px;
+  color: #f0ad4e;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.message {
+  font-size: 18px;
+  color: var(--color-text);
+  opacity: 0.8;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.cta {
+  font-size: 16px;
+  color: var(--color-text);
+  opacity: 0.6;
+  margin: 0;
+}
+
+.details {
+  width: 100%;
+  max-width: 600px;
+  text-align: left;
+}
+
+.detailsSummary {
+  font-size: 14px;
+  color: var(--color-text);
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 8px 0;
+  user-select: none;
+}
+
+.detailsSummary:hover {
+  opacity: 0.8;
+}
+
+.detailsContent {
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--color-text);
+  opacity: 0.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.actionButton {
+  min-height: var(--touch-target-min);
+  min-width: 160px;
+  padding: 12px 32px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  background: var(--color-accent);
+  color: var(--color-text);
+  transition: background 0.15s;
+}
+
+.actionButton:hover {
+  background: var(--color-accent-active);
+}
+
+.actionButton:active {
+  transform: scale(0.98);
+}

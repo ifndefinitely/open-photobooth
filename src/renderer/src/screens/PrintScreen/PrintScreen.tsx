@@ -64,11 +64,12 @@ function PrintScreen(): React.JSX.Element {
       <div className={styles.errorContainer}>
         <h1 className={styles.errorTitle}>{t('error.title')}</h1>
         <p className={styles.errorMessage}>{t('error.printFailed')}</p>
+        <p className={styles.errorCta}>{t('error.contactOwner')}</p>
 
         <details className={styles.errorDetails}>
           <summary className={styles.errorDetailsSummary}>{t('error.debugDetails')}</summary>
           <div className={styles.errorDetailsContent}>
-            {`Error: ${error}\nPrinter: ${printerName || '(none)'}\nPaper size: ${paperSize}\nTime: ${new Date().toLocaleString()}`}
+            {`Error: ${error}\nPrinter: ${printerName || '(none)'}\nPaper size: ${paperSize}\nTime: ${new Date().toISOString()}`}
           </div>
         </details>
 

@@ -2,6 +2,7 @@ import { useReducer, useEffect, useCallback } from 'react'
 import { useStripStore } from '@/stores/stripStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { t } from '@/i18n'
+import { logger } from '@/services/loggerService'
 
 export type PrintStatus = 'idle' | 'printing' | 'success' | 'error'
 
@@ -48,14 +49,22 @@ export function usePrintJob(): PrintJobResult {
 
     const imageDataUrl = printSheetResult?.dataUrl
     if (!imageDataUrl) {
+      const msg = 'No print sheet data available'
+      logger.error('Printer', msg)
       dispatch({ type: 'error', error: t('error.printFailed') })
       return
     }
 
     if (!printerName) {
+      logger.error('Printer', 'No printer configured')
       dispatch({ type: 'error', error: t('error.printerNotFound') })
       return
     }
+
+    logger.info(
+      'Printer',
+      `Print job sent (printer: ${printerName}, paper: ${paperSize}, copies: ${copies})`
+    )
 
     try {
       const result = await window.api.printer.print({
@@ -68,14 +77,18 @@ export function usePrintJob(): PrintJobResult {
       })
 
       if (result.success) {
+        logger.info('Printer', 'Print job completed successfully')
         dispatch({ type: 'success' })
       } else {
+        logger.error('Printer', `Print job failed: ${result.error || 'Unknown error'}`)
         dispatch({ type: 'error', error: result.error || 'Unknown print error' })
       }
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to send print job'
+      logger.error('Printer', `Print job error: ${msg}`)
       dispatch({
         type: 'error',
-        error: err instanceof Error ? err.message : 'Failed to send print job'
+        error: msg
       })
     }
   }, [printSheetResult, printerName, paperSize, colorMode, margins, copies])

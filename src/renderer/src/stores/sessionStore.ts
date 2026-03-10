@@ -9,14 +9,12 @@ interface SessionState {
   currentPhotoIndex: number // 0-based: which photo we are on
   phase: SessionPhase
   countdownValue: number | null
-  lastError: { message: string; details?: string } | null
 
   // Actions
   setPhase: (phase: SessionPhase) => void
   setCountdownValue: (value: number | null) => void
   addPhoto: (photo: CaptureResult) => void
   advancePhoto: () => void
-  setLastError: (error: { message: string; details?: string } | null) => void
   resetSession: () => void
 }
 
@@ -25,7 +23,6 @@ export const useSessionStore = create<SessionState>((set) => ({
   currentPhotoIndex: 0,
   phase: 'idle',
   countdownValue: null,
-  lastError: null,
 
   setPhase: (phase) => set({ phase }),
 
@@ -35,14 +32,11 @@ export const useSessionStore = create<SessionState>((set) => ({
 
   advancePhoto: () => set((state) => ({ currentPhotoIndex: state.currentPhotoIndex + 1 })),
 
-  setLastError: (error) => set({ lastError: error }),
-
   resetSession: () =>
     set({
       photos: [],
       currentPhotoIndex: 0,
       phase: 'idle',
-      countdownValue: null,
-      lastError: null
+      countdownValue: null
     })
 }))

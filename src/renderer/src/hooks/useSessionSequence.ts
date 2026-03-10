@@ -4,9 +4,9 @@ import { useSessionSettingsStore } from '@/stores/sessionSettingsStore'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useCameraStore } from '@/stores/cameraStore'
 import { useStripStore } from '@/stores/stripStore'
+import { useErrorStore } from '@/stores/errorStore'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import { playSFX, SFX } from '@/services/audioService'
-import { t } from '@/i18n'
 
 /**
  * Orchestrates the entire photo session sequence:
@@ -156,12 +156,11 @@ export function useSessionSequence(): void {
           .filter(Boolean)
           .join('\n')
 
-        useSessionStore.getState().setLastError({
-          message: t('error.cameraDisconnected'),
-          details: details || undefined
+        useErrorStore.getState().showError({
+          titleKey: 'error.title',
+          messageKey: 'error.cameraDisconnected',
+          debugInfo: details || undefined
         })
-
-        useNavigationStore.getState().navigateTo('error')
       }
     })
 

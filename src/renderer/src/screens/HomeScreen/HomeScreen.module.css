@@ -48,3 +48,10 @@
   transform: scale(0.95);
   background-color: var(--color-accent-active);
 }
+
+.takePhotosButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  background-color: var(--color-surface-light);
+}

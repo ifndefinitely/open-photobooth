@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { logger } from '@/services/loggerService'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { useStripStore } from '@/stores/stripStore'
@@ -43,7 +44,9 @@ function ReviewScreen(): React.JSX.Element {
 
   const handlePrintPress = useCallback(async () => {
     if (!printerName) {
-      setPrinterErrorDetail('No printer selected. Please configure a printer in Admin Settings.')
+      const detail = 'No printer selected. Please configure a printer in Admin Settings.'
+      logger.error('Printer', detail)
+      setPrinterErrorDetail(detail)
       setConfirmAction('printerError')
       return
     }
@@ -54,13 +57,15 @@ function ReviewScreen(): React.JSX.Element {
       if (result.available) {
         setConfirmAction('print')
       } else {
-        setPrinterErrorDetail(
-          `Printer "${printerName}" is not available (status: ${result.status}).`
-        )
+        const detail = `Printer "${printerName}" is not available (status: ${result.status}).`
+        logger.error('Printer', detail)
+        setPrinterErrorDetail(detail)
         setConfirmAction('printerError')
       }
     } catch {
-      setPrinterErrorDetail('Could not check printer status.')
+      const detail = 'Could not check printer status.'
+      logger.error('Printer', detail)
+      setPrinterErrorDetail(detail)
       setConfirmAction('printerError')
     } finally {
       setIsCheckingPrinter(false)
@@ -159,7 +164,7 @@ function ReviewScreen(): React.JSX.Element {
       {confirmAction === 'printerError' && (
         <ConfirmationDialog
           title={t('error.printerNotFound')}
-          message={printerErrorDetail || t('error.contactOwner')}
+          message={`${printerErrorDetail || t('error.printerNotFound')}\n\n${t('error.contactOwner')}`}
           confirmLabel={t('error.tryAgain')}
           cancelLabel={t('common.back')}
           variant="danger"

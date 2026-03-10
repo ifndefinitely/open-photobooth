@@ -9,6 +9,7 @@ import {
   type CameraDevice,
   type CaptureResult
 } from '@/services/cameraService'
+import { logger } from '@/services/loggerService'
 
 export interface CameraSettings {
   deviceId: string
@@ -94,15 +95,18 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       set({ devices })
       if (devices.length === 0) {
         set({ error: 'No cameras detected' })
+        logger.warn('Camera', 'No cameras detected')
       } else {
         // Clear device-related errors if cameras are now available
         const currentError = get().error
-        if (currentError === 'No cameras detected') {
+        if (currentError === 'No cameras detected' || currentError === 'Camera disconnected') {
           set({ error: null })
+          logger.info('Camera', `Camera reconnected (${devices.length} device(s) found)`)
         }
       }
     } catch {
       set({ error: 'Failed to enumerate cameras' })
+      logger.error('Camera', 'Failed to enumerate cameras')
     }
   },
 
@@ -184,10 +188,15 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       if (videoTrack) {
         videoTrack.addEventListener('ended', () => {
           set({ stream: null, error: 'Camera disconnected' })
+          logger.warn('Camera', 'Camera disconnected (track ended)')
         })
       }
 
       set({ stream, isLoading: false, error: null })
+      logger.info(
+        'Camera',
+        `Stream started (device: ${settings.deviceId || 'default'}, resolution: ${settings.resolution})`
+      )
     } catch (err) {
       const message =
         err instanceof DOMException
@@ -200,6 +209,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
                 : `Camera error: ${err.message}`
           : 'Failed to start camera'
       set({ stream: null, isLoading: false, error: message })
+      logger.error('Camera', `Failed to start camera: ${message}`)
     }
   },
 

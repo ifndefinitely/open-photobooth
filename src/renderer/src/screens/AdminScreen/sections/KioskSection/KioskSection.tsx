@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
-import { Toggle, Dropdown } from '@/components/admin'
+import { Toggle, Dropdown, TextInput } from '@/components/admin'
 import styles from './KioskSection.module.css'
 
 const IDLE_TIMEOUT_OPTIONS = [
@@ -11,6 +12,15 @@ const IDLE_TIMEOUT_OPTIONS = [
 ]
 
 function KioskSection(): React.JSX.Element {
+  const [logPath, setLogPath] = useState('')
+
+  useEffect(() => {
+    window.api.logging
+      .getLogPath()
+      .then(setLogPath)
+      .catch(() => {})
+  }, [])
+
   const kioskAutoStart = useAppSettingsStore((s) => s.kioskAutoStart)
   const kioskPreventSleep = useAppSettingsStore((s) => s.kioskPreventSleep)
   const kioskPreventAltTab = useAppSettingsStore((s) => s.kioskPreventAltTab)
@@ -66,6 +76,14 @@ function KioskSection(): React.JSX.Element {
           onChange={(v) => setKioskIdleTimeout(Number(v))}
           options={IDLE_TIMEOUT_OPTIONS}
           description="Time before the app automatically returns to the home screen when no one interacts."
+        />
+
+        <TextInput
+          label="Log file directory"
+          value={logPath}
+          onChange={() => {}}
+          disabled
+          description="Application logs are stored here. Share these files when reporting issues."
         />
       </div>
     </div>

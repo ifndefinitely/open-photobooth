@@ -4,6 +4,8 @@ import type { PrintOptions } from './printerService'
 import * as settingsService from './settingsService'
 import * as storageService from './storageService'
 import type { SaveSessionData } from './storageService'
+import * as loggingService from './loggingService'
+import type { LogLevel } from './loggingService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -115,5 +117,15 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('gallery:get-default-path', () => {
     return storageService.getDefaultPath()
+  })
+
+  // ── Logging ──
+
+  ipcMain.handle('logging:log', (_event, level: LogLevel, source: string, message: string) => {
+    loggingService.log(level, source, message)
+  })
+
+  ipcMain.handle('logging:getLogPath', () => {
+    return loggingService.getLogPath()
   })
 }

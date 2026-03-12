@@ -24,7 +24,7 @@
 }
 
 .filterButton:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 .filterButton.selected {
@@ -55,6 +55,6 @@
 
 .filterLabel {
   color: var(--color-text);
-  font-size: 0.85rem;
+  font-size: 1rem;
   user-select: none;
 }

@@ -36,11 +36,19 @@ function PrintScreen(): React.JSX.Element {
   if (status === 'printing') {
     return (
       <div className={styles.container}>
-        {stripResult?.dataUrl && (
-          <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
-        )}
-        <div className={styles.spinner} />
-        <p className={styles.message}>{t('print.printing')}</p>
+        <div className={styles.glowRing}>
+          {stripResult?.dataUrl && (
+            <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
+          )}
+        </div>
+        <div className={styles.messageArea}>
+          <p className={styles.message}>{t('print.printing')}</p>
+          <div className={styles.dots}>
+            <span className={styles.dot} />
+            <span className={styles.dot} />
+            <span className={styles.dot} />
+          </div>
+        </div>
         {showLongWait && <p className={styles.secondaryMessage}>{t('print.stillPrinting')}</p>}
       </div>
     )
@@ -53,6 +61,9 @@ function PrintScreen(): React.JSX.Element {
         {stripResult?.dataUrl && (
           <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
         )}
+        <div className={styles.successIcon} aria-hidden="true">
+          ✓
+        </div>
         <p className={styles.message}>{t('print.success')}</p>
       </div>
     )

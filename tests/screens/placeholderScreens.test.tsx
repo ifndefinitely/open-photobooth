@@ -9,16 +9,18 @@ import ThankYouScreen from '@/screens/ThankYouScreen/ThankYouScreen'
 import ErrorScreen from '@/screens/ErrorScreen/ErrorScreen'
 import AdminScreen from '@/screens/AdminScreen/AdminScreen'
 
-// Mock the window.api for printer operations
-const mockPrinterApi = {
-  getPrinters: vi.fn().mockResolvedValue([]),
-  checkAvailability: vi.fn().mockResolvedValue({ available: true, status: 'ready' }),
-  print: vi.fn().mockResolvedValue({ success: true })
+// Use the global window.api mock from tests/setup.ts
+// Override printer mocks per-test as needed
+const mockPrinterApi = window.api.printer as {
+  getPrinters: ReturnType<typeof vi.fn>
+  checkAvailability: ReturnType<typeof vi.fn>
+  print: ReturnType<typeof vi.fn>
 }
 
 beforeEach(() => {
-  window.api = { printer: mockPrinterApi } as never
   vi.clearAllMocks()
+  mockPrinterApi.checkAvailability.mockResolvedValue({ available: true, status: 'ready' })
+  mockPrinterApi.print.mockResolvedValue({ success: true })
 })
 
 // SessionScreen is fully implemented in Epic 04 — placeholder tests removed.
@@ -31,7 +33,7 @@ describe('ReviewScreen', () => {
 
   it('renders review title', () => {
     render(<ReviewScreen />)
-    expect(screen.getByText('Review Your Photos')).toBeInTheDocument()
+    expect(screen.getByText('Your Photos')).toBeInTheDocument()
   })
 
   it('shows print confirmation after printer check', async () => {
@@ -63,16 +65,15 @@ describe('ReviewScreen', () => {
   it('navigates to session after confirming redo', () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
-    // The confirm button inside the dialog also says "Redo"
-    const redoButtons = screen.getAllByRole('button', { name: 'Redo' })
-    fireEvent.click(redoButtons[redoButtons.length - 1])
+    // The confirm button label is "Yes, Redo" (from i18n)
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, Redo' }))
     expect(useNavigationStore.getState().currentScreen).toBe('session')
   })
 
   it('dismisses redo dialog on cancel', () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    fireEvent.click(screen.getByRole('button', { name: 'No, Keep Photos' }))
     expect(screen.queryByText('Redo Photos?')).not.toBeInTheDocument()
   })
 
@@ -85,8 +86,7 @@ describe('ReviewScreen', () => {
   it('navigates to home after confirming start over', () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Start Over' }))
-    const startOverButtons = screen.getAllByRole('button', { name: 'Start Over' })
-    fireEvent.click(startOverButtons[startOverButtons.length - 1])
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, Start Over' }))
     expect(useNavigationStore.getState().currentScreen).toBe('home')
   })
 })
@@ -118,7 +118,7 @@ describe('PrintScreen', () => {
     mockPrinterApi.print.mockResolvedValueOnce({ success: false, error: 'Paper jam' })
     render(<PrintScreen />)
     await waitFor(() => {
-      expect(screen.getByText('Printing Failed')).toBeInTheDocument()
+      expect(screen.getByText('Something Went Wrong')).toBeInTheDocument()
     })
   })
 
@@ -157,7 +157,7 @@ describe('ErrorScreen', () => {
 
   it('renders error title', () => {
     render(<ErrorScreen />)
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument()
+    expect(screen.getByText('Something Went Wrong')).toBeInTheDocument()
   })
 
   it('navigates to home', () => {

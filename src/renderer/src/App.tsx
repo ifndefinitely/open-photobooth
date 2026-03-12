@@ -4,11 +4,13 @@ import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary'
 import { useCameraLifecycle } from '@/hooks/useCameraLifecycle'
 import { useMusicLifecycle } from '@/hooks/useMusicLifecycle'
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence'
+import { useStressTest } from '@/hooks/useStressTest'
 
 function App(): React.JSX.Element {
   const { ready } = useSettingsPersistence()
   useCameraLifecycle()
   useMusicLifecycle()
+  useStressTest()
 
   if (!ready) {
     return <div />

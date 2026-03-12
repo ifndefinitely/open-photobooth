@@ -113,7 +113,7 @@ function ReviewScreen(): React.JSX.Element {
 
       <div className={styles.actions}>
         <button
-          className={styles.button}
+          className={styles.buttonPrimary}
           onClick={handlePrintPress}
           disabled={isComposing || !!compositionError || isCheckingPrinter}
         >

@@ -2,10 +2,16 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import HomeScreen from '@/screens/HomeScreen/HomeScreen'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useCameraStore } from '@/stores/cameraStore'
+
+// Create a minimal mock MediaStream so cameraReady = true
+const mockStream = { getVideoTracks: () => [], getAudioTracks: () => [], getTracks: () => [] }
 
 describe('HomeScreen', () => {
   beforeEach(() => {
     useNavigationStore.getState().reset()
+    // Set a mock stream so the "Take Photos" button is enabled
+    useCameraStore.setState({ stream: mockStream as unknown as MediaStream, error: null })
   })
 
   it('renders the camera preview', () => {
@@ -24,6 +30,12 @@ describe('HomeScreen', () => {
     render(<HomeScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Take Photos' }))
     expect(useNavigationStore.getState().currentScreen).toBe('session')
+  })
+
+  it('disables Take Photos button when camera has no stream', () => {
+    useCameraStore.setState({ stream: null, error: null })
+    render(<HomeScreen />)
+    expect(screen.getByRole('button', { name: 'Take Photos' })).toBeDisabled()
   })
 })
 

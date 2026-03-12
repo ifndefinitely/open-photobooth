@@ -41,7 +41,7 @@
 }
 
 .exitButton:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
   background: var(--color-accent-active);
 }
 
@@ -63,6 +63,7 @@
 }
 
 .sidebarItem {
+  min-height: var(--touch-target-min);
   padding: 14px 20px;
   font-size: 1rem;
   color: #555;

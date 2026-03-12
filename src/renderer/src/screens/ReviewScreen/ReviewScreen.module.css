@@ -43,13 +43,20 @@
   cursor: pointer;
   transition:
     transform 0.1s ease,
-    background-color 0.1s ease;
+    background-color 0.15s ease;
   touch-action: manipulation;
 }
 
 .button:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
   background-color: var(--color-accent-active);
+}
+
+.buttonPrimary {
+  composes: button;
+  min-height: var(--touch-target-primary);
+  min-width: 200px;
+  font-size: 1.3rem;
 }
 
 .buttonSecondary {

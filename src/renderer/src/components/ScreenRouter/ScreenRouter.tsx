@@ -8,6 +8,7 @@ import PrintScreen from '@/screens/PrintScreen/PrintScreen'
 import ThankYouScreen from '@/screens/ThankYouScreen/ThankYouScreen'
 import ErrorScreen from '@/screens/ErrorScreen/ErrorScreen'
 import AdminScreen from '@/screens/AdminScreen/AdminScreen'
+import styles from './ScreenRouter.module.css'
 
 const screenMap: Record<ScreenName, ComponentType> = {
   home: HomeScreen,
@@ -23,7 +24,11 @@ function ScreenRouter(): React.JSX.Element {
   const currentScreen = useNavigationStore((state) => state.currentScreen)
   const Screen = screenMap[currentScreen] ?? HomeScreen
 
-  return <Screen />
+  return (
+    <div key={currentScreen} className={styles.screenTransition}>
+      <Screen />
+    </div>
+  )
 }
 
 export default ScreenRouter

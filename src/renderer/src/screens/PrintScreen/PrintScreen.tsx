@@ -10,7 +10,7 @@ const LONG_WAIT_THRESHOLD_MS = 60_000
 
 function PrintScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
-  const stripResult = useStripStore((s) => s.stripResult)
+  const printSheetResult = useStripStore((s) => s.printSheetResult)
   const printerName = usePrinterSettingsStore((s) => s.printerName)
   const paperSize = usePrinterSettingsStore((s) => s.paperSize)
 
@@ -37,8 +37,12 @@ function PrintScreen(): React.JSX.Element {
     return (
       <div className={styles.container}>
         <div className={styles.glowRing}>
-          {stripResult?.dataUrl && (
-            <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
+          {printSheetResult?.dataUrl && (
+            <img
+              className={styles.stripPreview}
+              src={printSheetResult.dataUrl}
+              alt="Your photo strip"
+            />
           )}
         </div>
         <div className={styles.messageArea}>
@@ -58,8 +62,12 @@ function PrintScreen(): React.JSX.Element {
   if (status === 'success') {
     return (
       <div className={styles.container}>
-        {stripResult?.dataUrl && (
-          <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
+        {printSheetResult?.dataUrl && (
+          <img
+            className={styles.stripPreview}
+            src={printSheetResult.dataUrl}
+            alt="Your photo strip"
+          />
         )}
         <div className={styles.successIcon} aria-hidden="true">
           ✓

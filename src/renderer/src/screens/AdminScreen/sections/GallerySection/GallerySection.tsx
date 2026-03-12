@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import ConfirmationDialog from '@/components/ConfirmationDialog/ConfirmationDialog'
+import ReprintDialog from './ReprintDialog'
 import styles from './GallerySection.module.css'
 
 // Matches the types from the preload GalleryAPI
@@ -49,6 +50,11 @@ function GallerySection(): React.JSX.Element {
   // Deletion state
   const [confirmDelete, setConfirmDelete] = useState<'single' | 'all' | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Reprint state
+  const [reprintSessionIds, setReprintSessionIds] = useState<string[] | null>(null)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Load default path on mount
   useEffect(() => {
@@ -209,13 +215,22 @@ function GallerySection(): React.JSX.Element {
                 />
               )}
 
-              <button
-                className={styles.deleteSessionButton}
-                onClick={() => setConfirmDelete('single')}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting...' : 'Delete Session'}
-              </button>
+              <div className={styles.detailActions}>
+                <button
+                  className={styles.reprintButton}
+                  onClick={() => setReprintSessionIds([selectedSessionId])}
+                  disabled={!sessionDetail.printSheetDataUrl}
+                >
+                  {sessionDetail.printSheetDataUrl ? 'Reprint' : 'No Print Data'}
+                </button>
+                <button
+                  className={styles.deleteSessionButton}
+                  onClick={() => setConfirmDelete('single')}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Session'}
+                </button>
+              </div>
             </>
           )}
 
@@ -228,6 +243,13 @@ function GallerySection(): React.JSX.Element {
               variant="danger"
               onConfirm={handleDeleteSession}
               onCancel={() => setConfirmDelete(null)}
+            />
+          )}
+
+          {reprintSessionIds && (
+            <ReprintDialog
+              sessionIds={reprintSessionIds}
+              onClose={() => setReprintSessionIds(null)}
             />
           )}
         </div>
@@ -293,13 +315,34 @@ function GallerySection(): React.JSX.Element {
       <div className={styles.galleryHeader}>
         <h3 className={styles.galleryTitle}>Saved Sessions</h3>
         {sessions.length > 0 && (
-          <button
-            className={styles.deleteAllButton}
-            onClick={() => setConfirmDelete('all')}
-            disabled={isDeleting}
-          >
-            {isDeleting ? 'Deleting...' : 'Delete All Sessions'}
-          </button>
+          <div className={styles.galleryHeaderActions}>
+            {selectMode && selectedIds.size > 0 && (
+              <button
+                className={styles.reprintSelectedButton}
+                onClick={() => setReprintSessionIds(Array.from(selectedIds))}
+              >
+                Reprint Selected ({selectedIds.size})
+              </button>
+            )}
+            <button
+              className={styles.selectButton}
+              onClick={() => {
+                setSelectMode((prev) => !prev)
+                setSelectedIds(new Set())
+              }}
+            >
+              {selectMode ? 'Cancel' : 'Select'}
+            </button>
+            {!selectMode && (
+              <button
+                className={styles.deleteAllButton}
+                onClick={() => setConfirmDelete('all')}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete All Sessions'}
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -317,17 +360,53 @@ function GallerySection(): React.JSX.Element {
             {visibleSessions.map((session) => (
               <div
                 key={session.id}
-                className={styles.sessionCard}
-                onClick={() => handleSessionClick(session.id)}
+                className={`${styles.sessionCard} ${selectMode && selectedIds.has(session.id) ? styles.sessionCardSelected : ''}`}
+                onClick={() => {
+                  if (selectMode) {
+                    setSelectedIds((prev) => {
+                      const next = new Set(prev)
+                      if (next.has(session.id)) {
+                        next.delete(session.id)
+                      } else {
+                        next.add(session.id)
+                      }
+                      return next
+                    })
+                  } else {
+                    handleSessionClick(session.id)
+                  }
+                }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    handleSessionClick(session.id)
+                    if (selectMode) {
+                      setSelectedIds((prev) => {
+                        const next = new Set(prev)
+                        if (next.has(session.id)) {
+                          next.delete(session.id)
+                        } else {
+                          next.add(session.id)
+                        }
+                        return next
+                      })
+                    } else {
+                      handleSessionClick(session.id)
+                    }
                   }
                 }}
               >
+                {selectMode && (
+                  <div className={styles.selectCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(session.id)}
+                      readOnly
+                      tabIndex={-1}
+                    />
+                  </div>
+                )}
                 {session.thumbnailDataUrl ? (
                   <img
                     src={session.thumbnailDataUrl}
@@ -368,6 +447,17 @@ function GallerySection(): React.JSX.Element {
           variant="danger"
           onConfirm={handleDeleteAll}
           onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
+      {reprintSessionIds && (
+        <ReprintDialog
+          sessionIds={reprintSessionIds}
+          onClose={() => {
+            setReprintSessionIds(null)
+            setSelectMode(false)
+            setSelectedIds(new Set())
+          }}
         />
       )}
     </div>

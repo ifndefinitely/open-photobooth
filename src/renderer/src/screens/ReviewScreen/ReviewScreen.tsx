@@ -23,7 +23,7 @@ function ReviewScreen(): React.JSX.Element {
   const goHome = useNavigationStore((s) => s.goHome)
   const photos = useSessionStore((s) => s.photos)
 
-  const stripResult = useStripStore((s) => s.stripResult)
+  const printSheetResult = useStripStore((s) => s.printSheetResult)
   const isComposing = useStripStore((s) => s.isComposing)
   const compositionError = useStripStore((s) => s.compositionError)
   const selectedFilter = useStripStore((s) => s.selectedFilter)
@@ -107,7 +107,7 @@ function ReviewScreen(): React.JSX.Element {
         {compositionError ? (
           <p className={styles.errorMessage}>{compositionError}</p>
         ) : (
-          <StripPreview dataUrl={stripResult?.dataUrl ?? null} isLoading={isComposing} />
+          <StripPreview dataUrl={printSheetResult?.dataUrl ?? null} isLoading={isComposing} />
         )}
       </div>
 

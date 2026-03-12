@@ -171,7 +171,8 @@ export function useSessionSequence(): void {
       mountedRef.current = false
       cancelAllTimers()
       unsubscribe()
-      useSessionStore.getState().resetSession()
+      // Do NOT resetSession here — photos must persist for ReviewScreen.
+      // Session is reset at the start of the next session (line 26).
     }
   }, [])
 }

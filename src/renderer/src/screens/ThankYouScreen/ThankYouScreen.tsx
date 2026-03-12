@@ -7,7 +7,7 @@ import styles from './ThankYouScreen.module.css'
 
 function ThankYouScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
-  const stripResult = useStripStore((s) => s.stripResult)
+  const printSheetResult = useStripStore((s) => s.printSheetResult)
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
   const t = useT()
 
@@ -16,8 +16,12 @@ function ThankYouScreen(): React.JSX.Element {
       <h1 className={styles.title}>{t('thankyou.title')}</h1>
       <p className={styles.subtitle}>{t('thankyou.subtitle')}</p>
 
-      {stripResult?.dataUrl && (
-        <img className={styles.stripPreview} src={stripResult.dataUrl} alt="Your photo strip" />
+      {printSheetResult?.dataUrl && (
+        <img
+          className={styles.stripPreview}
+          src={printSheetResult.dataUrl}
+          alt="Your photo strip"
+        />
       )}
 
       <button className={styles.doneButton} onClick={goHome}>

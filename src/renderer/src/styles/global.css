@@ -1,4 +1,5 @@
 @import './variables.css';
+@import '../themes/tokens.css';
 
 @font-face {
   font-family: 'Inter';

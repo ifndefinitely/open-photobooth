@@ -3,13 +3,16 @@ import styles from './IdleCountdown.module.css'
 
 interface IdleCountdownProps {
   remainingSeconds: number
+  variant?: 'fixed' | 'inline'
 }
 
-function IdleCountdown({ remainingSeconds }: IdleCountdownProps): React.JSX.Element {
+function IdleCountdown({
+  remainingSeconds,
+  variant = 'fixed'
+}: IdleCountdownProps): React.JSX.Element {
   const t = useT()
-  return (
-    <div className={styles.countdown}>{t('idle.returning', { seconds: remainingSeconds })}</div>
-  )
+  const className = variant === 'inline' ? styles.inline : styles.countdown
+  return <div className={className}>{t('idle.returning', { seconds: remainingSeconds })}</div>
 }
 
 export default IdleCountdown

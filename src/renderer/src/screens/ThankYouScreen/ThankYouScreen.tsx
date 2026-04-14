@@ -28,7 +28,9 @@ function ThankYouScreen(): React.JSX.Element {
         {t('thankyou.done')}
       </button>
 
-      {remainingSeconds !== null && <IdleCountdown remainingSeconds={remainingSeconds} />}
+      {remainingSeconds !== null && (
+        <IdleCountdown remainingSeconds={remainingSeconds} variant="inline" />
+      )}
     </div>
   )
 }

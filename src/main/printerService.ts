@@ -1,4 +1,8 @@
 import { BrowserWindow, WebContentsPrintOptions } from 'electron'
+import * as fs from 'fs/promises'
+import * as os from 'os'
+import * as path from 'path'
+import { randomUUID } from 'crypto'
 import * as loggingService from './loggingService'
 
 export interface PrinterInfo {
@@ -81,6 +85,7 @@ export async function print(options: PrintOptions): Promise<PrintResult> {
   const { printerName, imageDataUrl, copies, colorMode, paperSize, margins } = options
 
   let printWindow: BrowserWindow | null = null
+  let tempHtmlPath: string | null = null
 
   try {
     // Create a hidden window to render the image for printing
@@ -95,37 +100,43 @@ export async function print(options: PrintOptions): Promise<PrintResult> {
     })
 
     // Build HTML with the image sized to fill the page
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            html, body { width: 100%; height: 100%; }
-            @media print {
-              @page {
-                margin: ${margins.top}mm ${margins.right}mm ${margins.bottom}mm ${margins.left}mm;
-              }
-            }
-            body {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            }
-            img {
-              max-width: 100%;
-              max-height: 100%;
-              object-fit: contain;
-            }
-          </style>
-        </head>
-        <body>
-          <img src="${imageDataUrl}" />
-        </body>
-      </html>
-    `
+    const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; }
+      @media print {
+        @page {
+          margin: ${margins.top}mm ${margins.right}mm ${margins.bottom}mm ${margins.left}mm;
+        }
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="${imageDataUrl}" />
+  </body>
+</html>`
 
-    await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
+    // Chromium rejects top-level data: URLs above ~2 MB with ERR_INVALID_URL.
+    // A print-resolution strip image, base64-encoded and then URL-encoded,
+    // easily exceeds that. Writing to a temp file and using loadFile() avoids
+    // the limit; the base64 image inside the loaded document's <img src> is
+    // not subject to the top-level navigation URL cap.
+    tempHtmlPath = path.join(os.tmpdir(), `open-photobooth-print-${randomUUID()}.html`)
+    await fs.writeFile(tempHtmlPath, html, 'utf-8')
+    await printWindow.loadFile(tempHtmlPath)
 
     // Wait for image to load
     await printWindow.webContents.executeJavaScript(`
@@ -207,6 +218,14 @@ export async function print(options: PrintOptions): Promise<PrintResult> {
   } finally {
     if (printWindow && !printWindow.isDestroyed()) {
       printWindow.close()
+    }
+    if (tempHtmlPath) {
+      try {
+        await fs.unlink(tempHtmlPath)
+      } catch (cleanupError) {
+        const msg = cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+        loggingService.log('WARN', 'Printer', `Failed to clean up temp print file: ${msg}`)
+      }
     }
   }
 }

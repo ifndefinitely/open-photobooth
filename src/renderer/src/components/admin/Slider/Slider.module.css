@@ -18,13 +18,13 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .value {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #333;
+  color: var(--admin-text-strong);
   min-width: 32px;
   text-align: right;
 }
@@ -34,7 +34,7 @@
   height: 6px;
   border-radius: 3px;
   appearance: none;
-  background: #ddd;
+  background: var(--admin-border);
   outline: none;
   cursor: pointer;
   min-height: var(--touch-target-min);
@@ -45,15 +45,15 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-accent);
+  background: var(--admin-accent);
   cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--admin-surface);
+  box-shadow: var(--admin-shadow-sm);
 }
 
 .description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   margin: 0;
   line-height: 1.3;
 }

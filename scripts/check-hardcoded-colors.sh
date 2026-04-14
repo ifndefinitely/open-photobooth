@@ -24,6 +24,8 @@ FILES=$(find src/renderer/src -name '*.module.css' \
 # Files explicitly whitelisted (functional hardcoded colors).
 WHITELIST=(
   "src/renderer/src/components/FlashOverlay/FlashOverlay.module.css"
+  "src/renderer/src/components/ConfirmationDialog/ConfirmationDialog.module.css"
+  "src/renderer/src/styles/placeholder.module.css"
 )
 
 is_whitelisted() {

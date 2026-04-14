@@ -13,6 +13,7 @@
   /* Semantic status colors (constant across themes) */
   --color-error: #e74c3c;
   --color-success: #2ecc71;
+  --color-warning: #f0ad4e;
 
   /* ── Admin UI palette (fixed — does NOT theme) ──────────── */
   /* Admin surfaces & layout */

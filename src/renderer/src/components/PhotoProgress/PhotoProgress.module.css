@@ -36,7 +36,7 @@
 }
 
 .dotCurrent {
-  border: 2px solid #ffffff;
+  border: 2px solid var(--color-text);
   background: rgba(255, 255, 255, 0.4);
   animation: pulse 1s ease-in-out infinite;
 }
@@ -52,8 +52,9 @@
 }
 
 .label {
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-text);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }

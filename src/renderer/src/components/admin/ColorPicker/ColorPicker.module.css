@@ -12,7 +12,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .pickerRow {
@@ -24,28 +24,28 @@
 .colorInput {
   width: 48px;
   height: 36px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
   cursor: pointer;
   padding: 2px;
-  background: #fff;
+  background: var(--admin-surface);
   min-height: var(--touch-target-min);
 }
 
 .colorInput:focus {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--admin-accent);
   outline-offset: -1px;
 }
 
 .hexValue {
   font-size: 0.875rem;
-  color: #555;
+  color: var(--admin-text-muted);
   font-family: monospace;
 }
 
 .description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   margin: 0;
   line-height: 1.3;
 }

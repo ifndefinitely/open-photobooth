@@ -7,7 +7,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #222;
+  color: var(--admin-text);
   margin: 0;
 }
 
@@ -26,9 +26,9 @@
 
 .logoPreview {
   padding: 8px;
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  background: var(--admin-surface-hover);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-input-radius);
   display: flex;
   justify-content: center;
 }
@@ -49,13 +49,13 @@
 .previewTitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
   margin: 0;
 }
 
 .previewCanvas {
   width: 200px;
   height: 600px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-input-radius);
 }

@@ -7,7 +7,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #222;
+  color: var(--admin-text);
   margin: 0;
 }
 
@@ -16,7 +16,7 @@
   height: 300px;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-border);
   background: #000;
 }
 
@@ -41,22 +41,22 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .select {
   padding: 8px 12px;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-surface);
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
 
 .select:focus {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--admin-accent);
   outline-offset: -1px;
 }
 
@@ -65,7 +65,7 @@
   align-items: center;
   gap: 8px;
   font-size: 1rem;
-  color: #333;
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
@@ -74,18 +74,18 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: var(--color-accent);
+  accent-color: var(--admin-accent);
 }
 
 .slider {
   width: 100%;
   min-height: var(--touch-target-min);
-  accent-color: var(--color-accent);
+  accent-color: var(--admin-accent);
   cursor: pointer;
 }
 
 .notice {
   font-size: 0.8125rem;
-  color: #b8860b;
+  color: var(--admin-warning-text);
   margin: 2px 0 0 0;
 }

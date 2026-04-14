@@ -19,7 +19,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
   cursor: pointer;
 }
 
@@ -28,7 +28,7 @@
   width: 48px;
   height: 28px;
   border-radius: 14px;
-  background: #ccc;
+  background: var(--admin-border-input);
   border: none;
   cursor: pointer;
   padding: 0;
@@ -37,7 +37,7 @@
 }
 
 .trackOn {
-  background: var(--color-accent);
+  background: var(--admin-accent);
 }
 
 .thumb {
@@ -47,9 +47,9 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--admin-surface);
   transition: transform 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--admin-shadow-sm);
 }
 
 .thumbOn {
@@ -58,7 +58,7 @@
 
 .description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   margin: 0;
   line-height: 1.3;
 }

@@ -6,15 +6,6 @@
   position: relative;
 }
 
-.adminGestureTarget {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 80px;
-  height: 80px;
-  touch-action: manipulation;
-}
-
 .preview {
   flex: 1;
   min-height: 70%;

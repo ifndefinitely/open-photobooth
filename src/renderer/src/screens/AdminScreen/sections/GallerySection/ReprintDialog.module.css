@@ -19,12 +19,13 @@
 }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--admin-surface);
+  border-radius: var(--admin-button-radius);
   padding: 24px 32px;
   max-width: 440px;
   min-width: 320px;
   animation: dialogPopIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--admin-shadow-dialog);
 }
 
 @keyframes dialogPopIn {
@@ -41,20 +42,20 @@
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #222;
+  color: var(--admin-text);
   margin: 0 0 16px 0;
 }
 
 .progress {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--admin-text-muted);
   margin: 0 0 12px 0;
 }
 
 .progressBar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--admin-border-light);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -62,7 +63,7 @@
 
 .progressFill {
   height: 100%;
-  background: var(--color-accent, #4caf50);
+  background: var(--admin-accent);
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -80,27 +81,27 @@
 
 .statusItem {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--admin-text-muted);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .statusPending {
-  color: #999;
+  color: var(--admin-text-hint);
 }
 
 .statusPrinting {
-  color: #1565c0;
+  color: var(--admin-info-text);
   font-weight: 600;
 }
 
 .statusSuccess {
-  color: #2e7d32;
+  color: var(--admin-success-text);
 }
 
 .statusError {
-  color: #c62828;
+  color: var(--admin-danger-text);
 }
 
 .statusIcon {
@@ -111,7 +112,7 @@
 
 .errorDetail {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--admin-text-hint);
   margin-left: 24px;
 }
 
@@ -127,14 +128,14 @@
   font-size: 0.875rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--admin-input-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
 
 .doneButton {
-  background: var(--color-accent, #4caf50);
-  color: #fff;
+  background: var(--admin-accent);
+  color: var(--admin-text-on-accent);
 }
 
 .doneButton:hover {
@@ -142,19 +143,19 @@
 }
 
 .stopButton {
-  background: #ef5350;
-  color: #fff;
+  background: var(--admin-danger-strong);
+  color: var(--admin-text-on-accent);
 }
 
 .stopButton:hover {
-  background: #e53935;
+  background: var(--admin-danger-hover);
 }
 
 .errorMessage {
   font-size: 0.9rem;
   padding: 12px;
-  border-radius: 6px;
-  background: #ffebee;
-  color: #c62828;
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-danger-bg);
+  color: var(--admin-danger-text);
   margin-bottom: 16px;
 }

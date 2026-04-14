@@ -7,7 +7,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #222;
+  color: var(--admin-text);
   margin: 0;
 }
 
@@ -20,10 +20,10 @@
 
 .success {
   font-size: 0.875rem;
-  color: #2e7d32;
-  background: #e8f5e9;
-  border: 1px solid #c8e6c9;
-  border-radius: 6px;
+  color: var(--admin-success-text);
+  background: var(--admin-success-bg);
+  border: 1px solid var(--admin-success-border);
+  border-radius: var(--admin-input-radius);
   padding: 8px 12px;
   margin: 0;
 }
@@ -39,10 +39,10 @@
   padding: 10px 24px;
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
-  background: var(--color-accent);
+  color: var(--admin-text-on-accent);
+  background: var(--admin-accent);
   border: none;
-  border-radius: var(--button-radius);
+  border-radius: var(--admin-button-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
   touch-action: manipulation;
@@ -53,24 +53,24 @@
 
 .changePinButton:active {
   transform: scale(0.97);
-  background: var(--color-accent-active);
+  background: var(--admin-accent-active);
 }
 
 .resetButton {
   padding: 10px 24px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #d32f2f;
+  color: var(--admin-danger);
   background: transparent;
-  border: 1px solid #d32f2f;
-  border-radius: var(--button-radius);
+  border: 1px solid var(--admin-danger);
+  border-radius: var(--admin-button-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
   touch-action: manipulation;
 }
 
 .resetButton:hover {
-  background: rgba(211, 47, 47, 0.05);
+  background: var(--admin-danger-tint);
 }
 
 .confirmRow {
@@ -82,7 +82,7 @@
 
 .confirmText {
   font-size: 0.875rem;
-  color: #d32f2f;
+  color: var(--admin-danger);
   font-weight: 600;
 }
 
@@ -90,10 +90,10 @@
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #fff;
-  background: #d32f2f;
+  color: var(--admin-text-on-accent);
+  background: var(--admin-danger);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--admin-input-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
@@ -102,10 +102,10 @@
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
-  background: #e8e8e8;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  color: var(--admin-text-muted);
+  background: var(--admin-button-hover-bg);
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }

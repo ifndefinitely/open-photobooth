@@ -7,7 +7,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #222;
+  color: var(--admin-text);
   margin: 0;
 }
 
@@ -27,7 +27,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .pathRow {
@@ -43,10 +43,10 @@
 .pathInput {
   padding: 8px 12px;
   font-size: 0.875rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #f9f9f9;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-surface-hover);
+  color: var(--admin-text-strong);
   min-height: var(--touch-target-min);
   font-family: monospace;
 }
@@ -59,10 +59,10 @@
 .explorerButton {
   padding: 8px 16px;
   font-size: 0.875rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #f5f5f5;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-button-bg);
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
   white-space: nowrap;
@@ -70,7 +70,7 @@
 
 .browseButton:hover,
 .explorerButton:hover {
-  background: #e8e8e8;
+  background: var(--admin-button-hover-bg);
 }
 
 .buttonRow {
@@ -80,7 +80,7 @@
 
 .note {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   font-style: italic;
   margin: 0;
 }
@@ -88,22 +88,22 @@
 .errorMessage {
   font-size: 0.875rem;
   padding: 8px 12px;
-  border-radius: 6px;
-  background: #ffebee;
-  color: #c62828;
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-danger-bg);
+  color: var(--admin-danger-text);
 }
 
 .successMessage {
   font-size: 0.875rem;
   padding: 8px 12px;
-  border-radius: 6px;
-  background: #e8f5e9;
-  color: #2e7d32;
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-success-bg);
+  color: var(--admin-success-text);
 }
 
 .divider {
   border: none;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--admin-border-light);
   margin: 8px 0;
 }
 
@@ -119,7 +119,7 @@
 .galleryTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #333;
+  color: var(--admin-text-strong);
   margin: 0;
 }
 
@@ -127,17 +127,17 @@
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
-  border: 1px solid #ef5350;
-  border-radius: 6px;
-  background: #fff;
-  color: #ef5350;
+  border: 1px solid var(--admin-danger-strong);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-surface);
+  color: var(--admin-danger-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
   white-space: nowrap;
 }
 
 .deleteAllButton:hover {
-  background: #ffebee;
+  background: var(--admin-danger-bg);
 }
 
 .deleteAllButton:disabled {
@@ -148,7 +148,7 @@
 .loadingMessage,
 .emptyMessage {
   font-size: 0.9rem;
-  color: #888;
+  color: var(--admin-text-hint);
   padding: 24px 0;
   text-align: center;
 }
@@ -162,33 +162,33 @@
 .sessionCard {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--admin-border-light);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.15s;
-  background: #fff;
+  background: var(--admin-surface);
 }
 
 .sessionCard:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--admin-shadow-md);
 }
 
 .sessionThumbnail {
   width: 100%;
   aspect-ratio: 1 / 3;
   object-fit: cover;
-  background: #f0f0f0;
+  background: var(--admin-surface-hover);
 }
 
 .sessionThumbnailPlaceholder {
   width: 100%;
   aspect-ratio: 1 / 3;
-  background: #f0f0f0;
+  background: var(--admin-surface-hover);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #bbb;
+  color: var(--admin-text-disabled);
   font-size: 0.8rem;
 }
 
@@ -198,30 +198,30 @@
 
 .sessionDate {
   font-size: 0.8rem;
-  color: #555;
+  color: var(--admin-text-muted);
   margin: 0 0 2px;
 }
 
 .sessionPhotoCount {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--admin-text-hint);
   margin: 0;
 }
 
 .loadMoreButton {
   padding: 10px 20px;
   font-size: 0.9rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #f5f5f5;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-button-bg);
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
   align-self: center;
 }
 
 .loadMoreButton:hover {
-  background: #e8e8e8;
+  background: var(--admin-button-hover-bg);
 }
 
 /* ── Session Detail View ── */
@@ -241,28 +241,28 @@
 .backButton {
   padding: 8px 16px;
   font-size: 0.875rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #f5f5f5;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-button-bg);
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
 
 .backButton:hover {
-  background: #e8e8e8;
+  background: var(--admin-button-hover-bg);
 }
 
 .detailTitle {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--admin-text-strong);
   margin: 0;
 }
 
 .detailMeta {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--admin-text-muted);
 }
 
 .detailPhotos {
@@ -277,13 +277,13 @@
   height: 90px;
   object-fit: cover;
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--admin-border-light);
   flex-shrink: 0;
 }
 
 .detailStrip {
   max-width: 300px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--admin-border-light);
   border-radius: 4px;
 }
 
@@ -292,16 +292,16 @@
   font-size: 0.9rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
-  background: #ef5350;
-  color: #fff;
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-danger-strong);
+  color: var(--admin-text-on-accent);
   cursor: pointer;
   min-height: var(--touch-target-min);
   align-self: flex-start;
 }
 
 .deleteSessionButton:hover {
-  background: #e53935;
+  background: var(--admin-danger-hover);
 }
 
 .deleteSessionButton:disabled {
@@ -322,9 +322,9 @@
   font-size: 0.9rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
-  background: var(--color-accent, #4caf50);
-  color: #fff;
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-accent);
+  color: var(--admin-text-on-accent);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
@@ -348,17 +348,17 @@
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #f5f5f5;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-button-bg);
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
   white-space: nowrap;
 }
 
 .selectButton:hover {
-  background: #e8e8e8;
+  background: var(--admin-button-hover-bg);
 }
 
 .reprintSelectedButton {
@@ -366,9 +366,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
-  background: var(--color-accent, #4caf50);
-  color: #fff;
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-accent);
+  color: var(--admin-text-on-accent);
   cursor: pointer;
   min-height: var(--touch-target-min);
   white-space: nowrap;
@@ -379,7 +379,7 @@
 }
 
 .sessionCardSelected {
-  outline: 3px solid var(--color-accent, #4caf50);
+  outline: 3px solid var(--admin-accent);
   outline-offset: -3px;
 }
 
@@ -394,5 +394,5 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: var(--color-accent, #4caf50);
+  accent-color: var(--admin-accent);
 }

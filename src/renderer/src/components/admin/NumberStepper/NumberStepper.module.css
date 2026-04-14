@@ -12,7 +12,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .stepper {
@@ -27,9 +27,9 @@
   min-height: var(--touch-target-min);
   font-size: 1.25rem;
   font-weight: 700;
-  color: #333;
-  background: #e8e8e8;
-  border: 1px solid #ccc;
+  color: var(--admin-text-strong);
+  background: var(--admin-button-hover-bg);
+  border: 1px solid var(--admin-border-input);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -39,19 +39,19 @@
 }
 
 .stepButton:first-child {
-  border-radius: 6px 0 0 6px;
+  border-radius: var(--admin-input-radius) 0 0 var(--admin-input-radius);
 }
 
 .stepButton:last-child {
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--admin-input-radius) var(--admin-input-radius) 0;
 }
 
 .stepButton:hover:not(:disabled) {
-  background: #ddd;
+  background: var(--admin-button-active-bg);
 }
 
 .stepButton:active:not(:disabled) {
-  background: #ccc;
+  background: var(--admin-border-input);
 }
 
 .stepButton:disabled {
@@ -67,15 +67,15 @@
   justify-content: center;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #333;
-  background: #fff;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  color: var(--admin-text-strong);
+  background: var(--admin-surface);
+  border-top: 1px solid var(--admin-border-input);
+  border-bottom: 1px solid var(--admin-border-input);
 }
 
 .description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   margin: 0;
   line-height: 1.3;
 }

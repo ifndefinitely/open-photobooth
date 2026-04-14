@@ -3,8 +3,8 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: #f5f5f5;
-  color: #333;
+  background: var(--admin-bg);
+  color: var(--admin-text-strong);
 }
 
 .header {
@@ -12,8 +12,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #ddd;
+  background: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-border);
   flex-shrink: 0;
 }
 
@@ -21,7 +21,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
-  color: #222;
+  color: var(--admin-text);
 }
 
 .exitButton {
@@ -29,10 +29,10 @@
   padding: 8px 24px;
   font-size: 1rem;
   font-weight: 600;
-  color: #ffffff;
-  background: var(--color-accent);
+  color: var(--admin-text-on-accent);
+  background: var(--admin-accent);
   border: none;
-  border-radius: var(--button-radius);
+  border-radius: var(--admin-button-radius);
   cursor: pointer;
   touch-action: manipulation;
   transition:
@@ -42,7 +42,7 @@
 
 .exitButton:active {
   transform: scale(0.96);
-  background: var(--color-accent-active);
+  background: var(--admin-accent-active);
 }
 
 .body {
@@ -54,8 +54,8 @@
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: #ffffff;
-  border-right: 1px solid #ddd;
+  background: var(--admin-surface);
+  border-right: 1px solid var(--admin-border);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -66,7 +66,7 @@
   min-height: var(--touch-target-min);
   padding: 14px 20px;
   font-size: 1rem;
-  color: #555;
+  color: var(--admin-text-muted);
   cursor: pointer;
   border: none;
   background: transparent;
@@ -77,13 +77,13 @@
 }
 
 .sidebarItem:hover {
-  background: #f0f0f0;
+  background: var(--admin-surface-hover);
 }
 
 .sidebarItemActive {
-  border-left-color: var(--color-accent);
-  background: #eef4fb;
-  color: #222;
+  border-left-color: var(--admin-accent);
+  background: var(--admin-accent-bg-subtle);
+  color: var(--admin-text);
   font-weight: 600;
 }
 
@@ -96,11 +96,11 @@
 .sectionTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #222;
+  color: var(--admin-text);
   margin: 0 0 12px 0;
 }
 
 .sectionPlaceholder {
   font-size: 1rem;
-  color: #888;
+  color: var(--admin-text-hint);
 }

@@ -1,5 +1,8 @@
 @import './variables.css';
 @import '../themes/tokens.css';
+@import '../themes/drugstore.css';
+@import '../themes/artDeco.css';
+@import '../themes/wedding.css';
 
 @font-face {
   font-family: 'Inter';
@@ -14,6 +17,86 @@
   font-weight: 700;
   font-style: normal;
   src: url('../assets/fonts/Inter-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alfa Slab One';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/AlfaSlabOne-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/RobotoSlab-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../assets/fonts/RobotoSlab-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Limelight';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/Limelight-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Jost';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/Jost-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Jost';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../assets/fonts/Jost-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/PlayfairDisplay-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../assets/fonts/PlayfairDisplay-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../assets/fonts/Lato-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../assets/fonts/Lato-Bold.ttf') format('truetype');
   font-display: swap;
 }
 

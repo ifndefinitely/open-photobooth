@@ -1,0 +1,36 @@
+/*
+ * Drugstore theme — 1950s carnival photobooth.
+ * Warm, loud, poster-y. Carnival red accent on warm near-black background.
+ * Typography: Alfa Slab One display + Roboto Slab body.
+ * Shape: hard retro offsets, solid cream borders.
+ *
+ * Values sourced from docs/superpowers/specs/2026-04-14-theme-system-design.md §5.1.
+ */
+:root[data-theme='drugstore'] {
+  /* ── Colors ──────────────────────────────────────────── */
+  --color-bg: #1a1210;
+  --color-surface: #2a1a15;
+  --color-surface-light: #3a241f;
+  --color-text: #faf3e7;
+  --color-text-muted: #c4b098;
+  --color-accent: #d32f2f;
+  --color-accent-active: #a82323;
+  --color-accent-contrast: #faf3e7;
+  --color-border: #faf3e7;
+  --color-accent-glow: rgba(211, 47, 47, 0.25);
+
+  /* ── Typography ──────────────────────────────────────── */
+  --font-display: 'Alfa Slab One', serif;
+  --font-body: 'Roboto Slab', serif;
+  --font-weight-display: 400;
+  --letter-spacing-display: -0.01em;
+
+  /* ── Shape ───────────────────────────────────────────── */
+  --button-radius: 8px;
+  --button-border-width: 3px;
+  --button-border-style: solid;
+  --button-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  --card-radius: 4px;
+  --card-shadow: 6px 6px 0 rgba(0, 0, 0, 0.4);
+  --input-radius: 4px;
+}

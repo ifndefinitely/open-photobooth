@@ -2,7 +2,8 @@ import { useRef, useState } from 'react'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import { useSessionSettingsStore } from '@/stores/sessionSettingsStore'
 import { Dropdown, Slider, Toggle } from '@/components/admin'
-import { playMusic, stopMusic, playSFX, MUSIC_TRACKS, SFX } from '@/services/audioService'
+import { playMusic, stopMusic, playSFX, SFX } from '@/services/audioService'
+import { getActiveMusicTracks } from '@/services/musicLibraryService'
 import styles from './AudioSection.module.css'
 
 const MUSIC_MODE_OPTIONS = [
@@ -30,9 +31,8 @@ function AudioSection(): React.JSX.Element {
   const [musicPreviewing, setMusicPreviewing] = useState(false)
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  function handlePreviewMusic(): void {
+  async function handlePreviewMusic(): Promise<void> {
     if (musicPreviewing) {
-      // Stop preview
       stopMusic(true)
       if (previewTimerRef.current) {
         clearTimeout(previewTimerRef.current)
@@ -42,7 +42,8 @@ function AudioSection(): React.JSX.Element {
       return
     }
 
-    playMusic(MUSIC_TRACKS)
+    const tracks = await getActiveMusicTracks()
+    playMusic(tracks)
     setMusicPreviewing(true)
 
     previewTimerRef.current = setTimeout(() => {

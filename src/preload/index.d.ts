@@ -106,12 +106,34 @@ export interface KioskAPI {
   setAdminPanelOpen: (open: boolean) => Promise<void>
 }
 
+export interface MusicLibraryTrack {
+  filename: string
+  url: string
+  sizeBytes: number
+}
+
+export type PickAndImportResult =
+  | { ok: true; track: MusicLibraryTrack }
+  | {
+      ok: false
+      reason: 'cancelled' | 'invalid-extension' | 'file-too-large' | 'library-full' | 'io-error'
+      message?: string
+    }
+
+export interface MusicLibraryAPI {
+  pickAndImport: () => Promise<PickAndImportResult>
+  remove: (filename: string) => Promise<void>
+  resolveActive: () => Promise<string[]>
+  list: () => Promise<MusicLibraryTrack[]>
+}
+
 export interface API {
   printer: PrinterAPI
   settings: SettingsAPI
   logging: LoggingAPI
   kiosk: KioskAPI
   gallery: GalleryAPI
+  musicLibrary: MusicLibraryAPI
 }
 
 declare global {

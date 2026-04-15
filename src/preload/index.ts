@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { MusicLibraryTrack, PickAndImportResult } from './index.d'
 
 // Custom APIs for renderer
 const api = {
@@ -57,6 +58,14 @@ const api = {
     openInExplorer: (): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('gallery:open-in-explorer'),
     getDefaultPath: (): Promise<string> => ipcRenderer.invoke('gallery:get-default-path')
+  },
+  musicLibrary: {
+    pickAndImport: (): Promise<PickAndImportResult> =>
+      ipcRenderer.invoke('musicLibrary:pickAndImport'),
+    remove: (filename: string): Promise<void> =>
+      ipcRenderer.invoke('musicLibrary:remove', filename),
+    resolveActive: (): Promise<string[]> => ipcRenderer.invoke('musicLibrary:resolveActive'),
+    list: (): Promise<MusicLibraryTrack[]> => ipcRenderer.invoke('musicLibrary:list')
   }
 }
 

@@ -1,11 +1,30 @@
-import { app, BrowserWindow, globalShortcut } from 'electron'
+import { app, BrowserWindow, globalShortcut, protocol, net } from 'electron'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipcHandlers'
 import * as settingsService from './settingsService'
 import * as loggingService from './loggingService'
 import * as kioskService from './kioskService'
+import * as musicLibraryService from './musicLibraryService'
+
+// Custom protocol for serving admin-imported music files. Must be registered
+// before app 'ready' fires. Works identically in dev (renderer origin =
+// http://localhost:<port>) and prod (renderer origin = file://) with
+// webSecurity: true intact.
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'custom-music',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      stream: true,
+      bypassCSP: false
+    }
+  }
+])
 
 function createWindow(): BrowserWindow {
   const isDev = is.dev
@@ -60,6 +79,31 @@ app.whenReady().then(async () => {
   const userDataPath = app.getPath('userData')
   await loggingService.init(userDataPath)
   await settingsService.init(userDataPath)
+  await musicLibraryService.init(userDataPath)
+
+  // Resolve custom-music://library/<filename> URLs to files in userData/custom-music.
+  // The service owns all path semantics; the handler is a thin security-gate wrapper.
+  protocol.handle('custom-music', async (request) => {
+    try {
+      const url = new URL(request.url)
+      if (url.hostname !== 'library') {
+        return new Response('Not found', { status: 404 })
+      }
+      const rawFilename = decodeURIComponent(url.pathname.replace(/^\//, ''))
+      const absolutePath = musicLibraryService.resolveFilename(rawFilename)
+      if (!absolutePath) {
+        return new Response('Not found', { status: 404 })
+      }
+      return net.fetch(pathToFileURL(absolutePath).toString())
+    } catch (err) {
+      loggingService.log(
+        'ERROR',
+        'music-library',
+        `Protocol handler error: ${(err as Error).message}`
+      )
+      return new Response('Internal error', { status: 500 })
+    }
+  })
 
   electronApp.setAppUserModelId('com.openphotobooth.app')
 

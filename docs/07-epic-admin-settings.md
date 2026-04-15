@@ -80,6 +80,7 @@ audio.musicVolume            : number  = 50            # 0-100
 audio.countdownBeep          : boolean = true          # Play beep on countdown numbers
 audio.shutterSound           : boolean = true          # Play shutter click on capture
 audio.flashEffect            : boolean = true          # Show visual flash on capture
+audio.customMusicTracks      : string[] = []          # Filenames in custom-music/, in playback order
 
 # Security
 pin.code                     : string  = "0000"       # 4-digit admin PIN

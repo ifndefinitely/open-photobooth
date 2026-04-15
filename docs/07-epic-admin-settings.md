@@ -35,6 +35,7 @@ Implement the settings infrastructure (persistence, defaults, UI components) and
 
 ```
 # Appearance
+appearance.theme             : string  = "drugstore"   # drugstore | artDeco | wedding
 appearance.logoPath          : string  = ""           # Path to logo image file
 appearance.eventName         : string  = ""           # Event name text on strip
 appearance.dateStampEnabled  : boolean = true          # Show date on strip

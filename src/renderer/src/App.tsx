@@ -5,12 +5,14 @@ import { useCameraLifecycle } from '@/hooks/useCameraLifecycle'
 import { useMusicLifecycle } from '@/hooks/useMusicLifecycle'
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence'
 import { useStressTest } from '@/hooks/useStressTest'
+import { useThemeApplication } from '@/hooks/useThemeApplication'
 
 function App(): React.JSX.Element {
   const { ready } = useSettingsPersistence()
   useCameraLifecycle()
   useMusicLifecycle()
   useStressTest()
+  useThemeApplication()
 
   if (!ready) {
     return <div />

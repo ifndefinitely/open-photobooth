@@ -28,7 +28,16 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   })
 
   ipcMain.handle('printer:check-availability', async (_event, printerName: string) => {
-    return checkPrinterAvailability(mainWindow, printerName)
+    const preflightSeconds = settingsService.get('printer.preflightTimeout')
+    const timeoutSec =
+      typeof preflightSeconds === 'number' &&
+      Number.isFinite(preflightSeconds) &&
+      preflightSeconds > 0
+        ? preflightSeconds
+        : 10
+    return checkPrinterAvailability(mainWindow, printerName, {
+      preflightTimeoutMs: timeoutSec * 1000
+    })
   })
 
   ipcMain.handle('printer:print', async (_event, options: PrintOptions) => {

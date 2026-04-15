@@ -4,6 +4,7 @@ import * as os from 'os'
 import * as path from 'path'
 import { randomUUID } from 'crypto'
 import * as loggingService from './loggingService'
+import * as statusService from './printerStatusService'
 
 export interface PrinterInfo {
   name: string
@@ -13,7 +14,14 @@ export interface PrinterInfo {
 
 export interface PrinterAvailability {
   available: boolean
-  status: string
+  status: string // 'ready' | 'busy' | 'warmingUp' | 'offline' | 'error' | 'not_found'
+  detail?: string
+  rawStatusCode?: number
+}
+
+export interface CheckAvailabilityOptions {
+  preflightTimeoutMs: number
+  pollIntervalMs?: number
 }
 
 export interface PrintOptions {
@@ -46,35 +54,40 @@ export async function getPrinters(mainWindow: BrowserWindow): Promise<PrinterInf
 
 /**
  * Check if a specific printer is available/online.
- * Returns within 3 seconds (or times out).
+ * Uses the Windows print spooler via printerStatusService and applies a
+ * warming-up patience window so sleeping USB printers get a chance to wake.
  */
 export async function checkPrinterAvailability(
   mainWindow: BrowserWindow,
-  printerName: string
+  printerName: string,
+  options: CheckAvailabilityOptions
 ): Promise<PrinterAvailability> {
-  const timeoutMs = 3000
-
-  const check = async (): Promise<PrinterAvailability> => {
-    const printers = await mainWindow.webContents.getPrintersAsync()
-    const printer = printers.find((p) => p.name === printerName)
-
-    if (!printer) {
-      loggingService.log('WARN', 'Printer', `Printer "${printerName}" not found`)
-      return { available: false, status: 'not_found' }
-    }
-
-    // Electron doesn't expose a reliable status field — if the printer is in
-    // the list, its drivers are loaded and it should be reachable.
-    loggingService.log('INFO', 'Printer', `Printer "${printerName}" is available`)
-    return { available: true, status: 'ready' }
+  // First verify the printer exists in the OS list at all.
+  const printers = await mainWindow.webContents.getPrintersAsync()
+  const printer = printers.find((p) => p.name === printerName)
+  if (!printer) {
+    loggingService.log('WARN', 'Printer', `Printer "${printerName}" not found`)
+    return { available: false, status: 'not_found' }
   }
 
-  return Promise.race([
-    check(),
-    new Promise<PrinterAvailability>((resolve) =>
-      setTimeout(() => resolve({ available: false, status: 'timeout' }), timeoutMs)
-    )
-  ])
+  // Delegate to the status service with the patience window.
+  const status = await statusService.waitForReady(printerName, {
+    timeoutMs: options.preflightTimeoutMs,
+    pollIntervalMs: options.pollIntervalMs ?? 500
+  })
+
+  const available = status.state === 'ready' || status.state === 'busy'
+  loggingService.log(
+    available ? 'INFO' : 'WARN',
+    'Printer',
+    `checkAvailability("${printerName}") → ${status.state} (${status.detail})`
+  )
+  return {
+    available,
+    status: status.state,
+    detail: status.detail,
+    rawStatusCode: status.rawStatusCode
+  }
 }
 
 /**

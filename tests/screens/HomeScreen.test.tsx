@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import HomeScreen from '@/screens/HomeScreen/HomeScreen'
+import AdminGestureOverlay from '@/components/AdminGestureOverlay/AdminGestureOverlay'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useCameraStore } from '@/stores/cameraStore'
 
@@ -50,18 +51,28 @@ describe('HomeScreen admin gesture', () => {
   })
 
   it('renders an invisible admin gesture target', () => {
-    const { container } = render(<HomeScreen />)
+    const { container } = render(
+      <>
+        <HomeScreen />
+        <AdminGestureOverlay />
+      </>
+    )
     const target = container.querySelector('[aria-hidden="true"]')
     expect(target).toBeInTheDocument()
   })
 
   it('shows PIN dialog after 5 taps within 3 seconds', () => {
-    const { container } = render(<HomeScreen />)
+    const { container } = render(
+      <>
+        <HomeScreen />
+        <AdminGestureOverlay />
+      </>
+    )
     const target = container.querySelector('[aria-hidden="true"]') as HTMLElement
 
     for (let i = 0; i < 5; i++) {
       vi.advanceTimersByTime(150)
-      fireEvent.click(target)
+      fireEvent.pointerDown(target)
     }
 
     expect(screen.getByText('Enter PIN')).toBeInTheDocument()
@@ -69,24 +80,34 @@ describe('HomeScreen admin gesture', () => {
   })
 
   it('does not show PIN dialog after only 4 taps', () => {
-    const { container } = render(<HomeScreen />)
+    const { container } = render(
+      <>
+        <HomeScreen />
+        <AdminGestureOverlay />
+      </>
+    )
     const target = container.querySelector('[aria-hidden="true"]') as HTMLElement
 
     for (let i = 0; i < 4; i++) {
       vi.advanceTimersByTime(150)
-      fireEvent.click(target)
+      fireEvent.pointerDown(target)
     }
 
     expect(screen.queryByText('Enter PIN')).not.toBeInTheDocument()
   })
 
   it('navigates to admin after entering correct PIN', () => {
-    const { container } = render(<HomeScreen />)
+    const { container } = render(
+      <>
+        <HomeScreen />
+        <AdminGestureOverlay />
+      </>
+    )
     const target = container.querySelector('[aria-hidden="true"]') as HTMLElement
 
     for (let i = 0; i < 5; i++) {
       vi.advanceTimersByTime(150)
-      fireEvent.click(target)
+      fireEvent.pointerDown(target)
     }
 
     fireEvent.click(screen.getByRole('button', { name: '0' }))
@@ -98,12 +119,17 @@ describe('HomeScreen admin gesture', () => {
   })
 
   it('closes PIN dialog on cancel and stays on home', () => {
-    const { container } = render(<HomeScreen />)
+    const { container } = render(
+      <>
+        <HomeScreen />
+        <AdminGestureOverlay />
+      </>
+    )
     const target = container.querySelector('[aria-hidden="true"]') as HTMLElement
 
     for (let i = 0; i < 5; i++) {
       vi.advanceTimersByTime(150)
-      fireEvent.click(target)
+      fireEvent.pointerDown(target)
     }
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))

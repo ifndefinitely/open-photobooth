@@ -10,17 +10,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--card-shadow, 0 4px 12px rgba(0, 0, 0, 0.4));
   z-index: 100;
 }
 
 .amber {
-  background: #f59f00;
+  background: var(--color-warning);
   color: #000;
 }
 
 .red {
-  background: #d9534f;
+  background: var(--color-error);
   color: #fff;
 }
 

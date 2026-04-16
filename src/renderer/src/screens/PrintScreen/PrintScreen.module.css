@@ -236,21 +236,22 @@
 .progressBar {
   width: min(480px, 80vw);
   height: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  background: var(--color-surface-light);
+  border-radius: var(--input-radius);
   overflow: hidden;
   margin: 16px auto 8px;
 }
 
 .progressFill {
   height: 100%;
-  background: #2ea043;
+  background: var(--color-success);
   transition: width 0.4s ease;
 }
 
 .timingHint {
+  font-family: var(--font-body);
   font-size: 14px;
-  color: #888;
+  color: var(--color-text-muted);
   margin: 8px 0 0;
   text-align: center;
 }

@@ -142,7 +142,7 @@
 .subgroup {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--admin-border-light);
 }
 
 .subgroupTitle {
@@ -150,7 +150,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin: 0 0 12px;
-  color: #aaa;
+  color: var(--admin-text-muted);
 }
 
 .liveStatusRow {
@@ -158,14 +158,15 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 6px;
+  background: var(--admin-surface-hover);
+  border-radius: var(--admin-input-radius);
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
 .liveLabel {
   font-weight: 700;
+  color: var(--admin-text-strong);
 }
 
 .liveBadge {
@@ -178,26 +179,26 @@
 
 .live_ready,
 .live_busy {
-  background: #2ea043;
-  color: #fff;
+  background: var(--admin-success-bg);
+  color: var(--admin-success-text);
 }
 .live_warmingUp {
-  background: #f59f00;
-  color: #000;
+  background: var(--admin-warning-bg);
+  color: var(--admin-warning-text);
 }
 .live_offline,
 .live_error {
-  background: #d9534f;
-  color: #fff;
+  background: var(--admin-danger-bg);
+  color: var(--admin-danger-text);
 }
 .live_unknown {
-  background: #555;
-  color: #fff;
+  background: var(--admin-button-bg);
+  color: var(--admin-text-hint);
 }
 
 .liveDetail {
   flex: 1;
-  color: #bbb;
+  color: var(--admin-text-hint);
   font-family: monospace;
   font-size: 13px;
 }

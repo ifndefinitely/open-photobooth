@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain } from 'electron'
+import { BrowserWindow, dialog, ipcMain, app } from 'electron'
 import { getPrinters, checkPrinterAvailability, print } from './printerService'
 import type { PrintOptions } from './printerService'
 import * as settingsService from './settingsService'
@@ -7,6 +7,7 @@ import type { SaveSessionData } from './storageService'
 import * as loggingService from './loggingService'
 import type { LogLevel } from './loggingService'
 import * as kioskService from './kioskService'
+import * as statusService from './printerStatusService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -163,4 +164,56 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   ipcMain.handle('logging:getLogPath', () => {
     return loggingService.getLogPath()
   })
+
+  // ── Printer Status ──
+
+  ipcMain.handle('printer:get-status', async (_event, printerName: string) => {
+    return statusService.getStatus(printerName)
+  })
+
+  // ── Log buffer ──
+
+  ipcMain.handle(
+    'logging:get-recent',
+    (_event, options: { limit: number; source?: string; level?: LogLevel }) => {
+      return loggingService.getRecent(options)
+    }
+  )
+
+  // ── Dev-only mock status override (NODE_ENV === 'development') ──
+  if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
+    let mockStatus: import('./printerStatusService').PrinterStatus | null = null
+
+    ipcMain.handle(
+      '__dev:set-mock-printer-status',
+      (
+        _event,
+        override: null | {
+          state: 'ready' | 'busy' | 'warmingUp' | 'offline' | 'error'
+          rawStatusCode: number
+          detail: string
+        }
+      ) => {
+        if (override === null) {
+          mockStatus = null
+          return
+        }
+        mockStatus = {
+          name: 'MOCK',
+          state: override.state,
+          rawStatusCode: override.rawStatusCode,
+          jobCount: 0,
+          detail: override.detail,
+          queriedAt: Date.now()
+        }
+      }
+    )
+
+    // Replace the real get-status handler when a mock is set
+    ipcMain.removeHandler('printer:get-status')
+    ipcMain.handle('printer:get-status', async (_event, printerName: string) => {
+      if (mockStatus) return { ...mockStatus, name: printerName }
+      return statusService.getStatus(printerName)
+    })
+  }
 }

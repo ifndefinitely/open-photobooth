@@ -1,9 +1,23 @@
 import { appendFile, mkdir, readdir, stat, unlink } from 'fs/promises'
 import { join } from 'path'
+import type { WebContents } from 'electron'
 
 // ── Types ──
 
 export type LogLevel = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG'
+
+export interface LogEntry {
+  timestamp: string
+  level: LogLevel
+  source: string
+  message: string
+}
+
+export interface GetRecentOptions {
+  limit: number
+  source?: string
+  level?: LogLevel
+}
 
 // ── Constants ──
 
@@ -20,6 +34,13 @@ let currentFilePath = ''
 let currentFileSuffix = 1
 let currentFileSize = 0
 let writeQueue: Promise<void> = Promise.resolve()
+
+// ── Ring buffer for recent logs (read by admin UI) + main→renderer mirror ──
+
+const BUFFER_SIZE = 500
+const buffer: LogEntry[] = []
+let mirrorTarget: WebContents | null = null
+let mirrorBuffered: LogEntry[] = []
 
 // ── Helpers ──
 
@@ -147,8 +168,25 @@ export async function init(userDataPath: string): Promise<void> {
 export function log(level: LogLevel, source: string, message: string): void {
   const timestamp = new Date().toISOString()
   const entry = `[${timestamp}] [${level}] [${source}] ${message}\n`
+  const structured: LogEntry = { timestamp, level, source, message }
 
-  // Queue writes to avoid concurrent appendFile calls
+  // Append to in-memory ring buffer
+  buffer.unshift(structured)
+  if (buffer.length > BUFFER_SIZE) buffer.length = BUFFER_SIZE
+
+  // Mirror to renderer (console.debug) — buffer until renderer attaches
+  if (mirrorTarget && !mirrorTarget.isDestroyed()) {
+    try {
+      mirrorTarget.send('log:mirror', structured)
+    } catch {
+      // swallow
+    }
+  } else {
+    mirrorBuffered.push(structured)
+    if (mirrorBuffered.length > BUFFER_SIZE) mirrorBuffered.shift()
+  }
+
+  // Queue disk writes
   writeQueue = writeQueue.then(async () => {
     try {
       await checkDateRotation()
@@ -156,7 +194,6 @@ export function log(level: LogLevel, source: string, message: string): void {
       await appendFile(currentFilePath, entry, 'utf-8')
       currentFileSize += Buffer.byteLength(entry, 'utf-8')
     } catch (err) {
-      // Last resort: log to console if file write fails
       console.error('[Logging] Failed to write log entry:', err)
       console.error('[Logging] Original entry:', entry.trim())
     }
@@ -166,4 +203,38 @@ export function log(level: LogLevel, source: string, message: string): void {
 /** Return the log directory path (for display in admin panel). */
 export function getLogPath(): string {
   return logDir
+}
+
+/** Return recent log entries in reverse chronological order. */
+export function getRecent(options: GetRecentOptions): LogEntry[] {
+  const out: LogEntry[] = []
+  for (const entry of buffer) {
+    if (options.source && entry.source !== options.source) continue
+    if (options.level && entry.level !== options.level) continue
+    out.push(entry)
+    if (out.length >= options.limit) break
+  }
+  return out
+}
+
+/** Attach a WebContents as the renderer mirror target. Flushes any buffered entries. */
+export function attachRendererMirror(target: WebContents): void {
+  mirrorTarget = target
+  const flush = mirrorBuffered
+  mirrorBuffered = []
+  for (const entry of flush) {
+    if (target.isDestroyed()) break
+    try {
+      target.send('log:mirror', entry)
+    } catch {
+      // swallow
+    }
+  }
+}
+
+/** Testing helper — clears the ring buffer between unit tests. */
+export function _resetForTest(): void {
+  buffer.length = 0
+  mirrorBuffered.length = 0
+  mirrorTarget = null
 }

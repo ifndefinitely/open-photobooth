@@ -13,7 +13,15 @@ const mockApi = {
       detail: 'Ready (code 3)',
       rawStatusCode: 3
     }),
-    print: vi.fn().mockResolvedValue({ success: true, verified: true })
+    print: vi.fn().mockResolvedValue({ success: true, verified: true }),
+    getStatus: vi.fn().mockResolvedValue({
+      name: '',
+      state: 'ready',
+      rawStatusCode: 3,
+      jobCount: 0,
+      detail: 'Ready (code 3)',
+      queriedAt: Date.now()
+    })
   },
   settings: {
     get: vi.fn().mockResolvedValue(null),
@@ -39,10 +47,15 @@ const mockApi = {
   },
   logging: {
     log: vi.fn().mockResolvedValue(undefined),
-    getLogPath: vi.fn().mockResolvedValue('/tmp/logs')
+    getLogPath: vi.fn().mockResolvedValue('/tmp/logs'),
+    getRecent: vi.fn().mockResolvedValue([]),
+    onMirror: vi.fn().mockReturnValue(() => {})
   },
   kiosk: {
     setAdminPanelOpen: vi.fn().mockResolvedValue(undefined)
+  },
+  __dev: {
+    setMockPrinterStatus: vi.fn().mockResolvedValue(undefined)
   }
 }
 

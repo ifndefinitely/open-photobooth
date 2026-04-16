@@ -15,12 +15,14 @@ interface StripState {
   printSheetResult: StripResult | null
   isComposing: boolean
   compositionError: string | null
+  wasPrinted: boolean
 
   setSelectedFilter: (filter: FilterType) => void
   setStripResult: (result: StripResult | null) => void
   setPrintSheetResult: (result: StripResult | null) => void
   setIsComposing: (value: boolean) => void
   setCompositionError: (error: string | null) => void
+  setWasPrinted: (value: boolean) => void
   resetStrip: () => void
 }
 
@@ -30,18 +32,21 @@ export const useStripStore = create<StripState>((set) => ({
   printSheetResult: null,
   isComposing: false,
   compositionError: null,
+  wasPrinted: true,
 
   setSelectedFilter: (filter) => set({ selectedFilter: filter }),
   setStripResult: (result) => set({ stripResult: result }),
   setPrintSheetResult: (result) => set({ printSheetResult: result }),
   setIsComposing: (value) => set({ isComposing: value }),
   setCompositionError: (error) => set({ compositionError: error }),
+  setWasPrinted: (wasPrinted) => set({ wasPrinted }),
   resetStrip: () =>
     set({
       selectedFilter: 'none',
       stripResult: null,
       printSheetResult: null,
       isComposing: false,
-      compositionError: null
+      compositionError: null,
+      wasPrinted: true
     })
 }))

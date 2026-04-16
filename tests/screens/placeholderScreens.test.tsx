@@ -102,34 +102,53 @@ describe('PrintScreen', () => {
   beforeEach(() => {
     useNavigationStore.getState().reset()
     usePrinterSettingsStore.getState().setPrinterName('TestPrinter')
-    useStripStore.getState().setPrintSheetResult(fakePrintSheet)
-    // Make print hang so we can see the "printing" state
+    useStripStore.setState({ printSheetResult: fakePrintSheet, wasPrinted: true })
+  })
+
+  it('renders printing message after preflight', async () => {
+    // Print hangs so state stays on "submitting"
     mockPrinterApi.print.mockImplementation(
       () => new Promise((resolve) => setTimeout(() => resolve({ success: true }), 60000))
     )
-  })
-
-  it('renders printing message', () => {
-    render(<PrintScreen />)
-    expect(screen.getByText('Printing your photos...')).toBeInTheDocument()
-  })
-
-  it('shows error state when print fails', async () => {
-    mockPrinterApi.print.mockResolvedValueOnce({ success: false, error: 'Paper jam' })
     render(<PrintScreen />)
     await waitFor(() => {
-      expect(screen.getByText('Something Went Wrong')).toBeInTheDocument()
+      expect(screen.getByText('Printing your photos...')).toBeInTheDocument()
     })
   })
 
-  it('shows try again and back buttons on error', async () => {
-    mockPrinterApi.print.mockResolvedValueOnce({ success: false, error: 'Paper jam' })
-    render(<PrintScreen />)
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Try Again' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
+  it('shows error dialog when print fails', async () => {
+    // Both attempts fail → failed_hard (autoRetryOnce defaults true)
+    mockPrinterApi.print.mockResolvedValue({
+      success: false,
+      verified: false,
+      reason: 'paper_out'
     })
-  })
+    render(<PrintScreen />)
+    await waitFor(
+      () => {
+        // PrinterErrorDialog renders "printer.error.title" via t()
+        expect(screen.getByRole('dialog')).toBeInTheDocument()
+      },
+      { timeout: 5000 }
+    )
+  }, 10000)
+
+  it('shows retry and skip buttons on error', async () => {
+    mockPrinterApi.print.mockResolvedValue({
+      success: false,
+      verified: false,
+      reason: 'paper_out'
+    })
+    render(<PrintScreen />)
+    await waitFor(
+      () => {
+        // PrinterErrorDialog buttons use i18n keys (returned as-is when not in en.json yet)
+        expect(screen.getByRole('dialog')).toBeInTheDocument()
+        expect(screen.getAllByRole('button').length).toBeGreaterThanOrEqual(2)
+      },
+      { timeout: 5000 }
+    )
+  }, 10000)
 })
 
 describe('ThankYouScreen', () => {

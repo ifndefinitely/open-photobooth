@@ -31,10 +31,22 @@ export interface PrintResult {
   error?: string
 }
 
+export type PrinterState = 'ready' | 'busy' | 'warmingUp' | 'offline' | 'error'
+
+export interface PrinterStatus {
+  name: string
+  state: PrinterState
+  rawStatusCode: number
+  jobCount: number
+  detail: string
+  queriedAt: number
+}
+
 export interface PrinterAPI {
   getPrinters: () => Promise<PrinterInfo[]>
   checkAvailability: (printerName: string) => Promise<PrinterAvailability>
   print: (options: PrintOptions) => Promise<PrintResult>
+  getStatus: (printerName: string) => Promise<PrinterStatus>
 }
 
 export interface SettingsAPI {
@@ -103,13 +115,36 @@ export interface GalleryAPI {
   getDefaultPath: () => Promise<string>
 }
 
+export type LogLevel = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG'
+
+export interface LogEntry {
+  timestamp: string
+  level: LogLevel
+  source: string
+  message: string
+}
+
+export interface GetRecentOptions {
+  limit: number
+  source?: string
+  level?: LogLevel
+}
+
 export interface LoggingAPI {
   log: (level: string, source: string, message: string) => Promise<void>
   getLogPath: () => Promise<string>
+  getRecent: (options: GetRecentOptions) => Promise<LogEntry[]>
+  onMirror: (handler: (entry: LogEntry) => void) => () => void
 }
 
 export interface KioskAPI {
   setAdminPanelOpen: (open: boolean) => Promise<void>
+}
+
+export interface DevAPI {
+  setMockPrinterStatus: (
+    override: null | { state: string; rawStatusCode: number; detail: string }
+  ) => Promise<void>
 }
 
 export interface API {
@@ -118,6 +153,7 @@ export interface API {
   logging: LoggingAPI
   kiosk: KioskAPI
   gallery: GalleryAPI
+  __dev: DevAPI
 }
 
 declare global {

@@ -7,7 +7,9 @@ const api = {
     getPrinters: (): Promise<unknown[]> => ipcRenderer.invoke('printer:get-list'),
     checkAvailability: (printerName: string): Promise<unknown> =>
       ipcRenderer.invoke('printer:check-availability', printerName),
-    print: (options: unknown): Promise<unknown> => ipcRenderer.invoke('printer:print', options)
+    print: (options: unknown): Promise<unknown> => ipcRenderer.invoke('printer:print', options),
+    getStatus: (printerName: string): Promise<unknown> =>
+      ipcRenderer.invoke('printer:get-status', printerName)
   },
   settings: {
     get: (key: string): Promise<unknown> => ipcRenderer.invoke('settings:get', key),
@@ -25,11 +27,23 @@ const api = {
   logging: {
     log: (level: string, source: string, message: string): Promise<void> =>
       ipcRenderer.invoke('logging:log', level, source, message),
-    getLogPath: (): Promise<string> => ipcRenderer.invoke('logging:getLogPath')
+    getLogPath: (): Promise<string> => ipcRenderer.invoke('logging:getLogPath'),
+    getRecent: (options: { limit: number; source?: string; level?: string }): Promise<unknown[]> =>
+      ipcRenderer.invoke('logging:get-recent', options),
+    onMirror: (handler: (entry: unknown) => void): (() => void) => {
+      const listener = (_event: unknown, entry: unknown): void => handler(entry)
+      ipcRenderer.on('log:mirror', listener as never)
+      return () => ipcRenderer.removeListener('log:mirror', listener as never)
+    }
   },
   kiosk: {
     setAdminPanelOpen: (open: boolean): Promise<void> =>
       ipcRenderer.invoke('kiosk:set-admin-panel-open', open)
+  },
+  __dev: {
+    setMockPrinterStatus: (
+      override: null | { state: string; rawStatusCode: number; detail: string }
+    ): Promise<void> => ipcRenderer.invoke('__dev:set-mock-printer-status', override)
   },
   gallery: {
     saveSession: (data: {

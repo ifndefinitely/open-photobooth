@@ -217,3 +217,25 @@
   composes: button;
   background-color: var(--color-surface-light);
 }
+
+.progressBar {
+  width: min(480px, 80vw);
+  height: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px auto 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: #2ea043;
+  transition: width 0.4s ease;
+}
+
+.timingHint {
+  font-size: 14px;
+  color: #888;
+  margin: 8px 0 0;
+  text-align: center;
+}

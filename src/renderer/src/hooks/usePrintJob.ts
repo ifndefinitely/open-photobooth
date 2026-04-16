@@ -1,39 +1,67 @@
-import { useReducer, useEffect, useCallback } from 'react'
+import { useReducer, useEffect, useCallback, useRef } from 'react'
 import { useStripStore } from '@/stores/stripStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
-import { t } from '@/i18n'
 import { logger } from '@/services/loggerService'
 
-export type PrintStatus = 'idle' | 'printing' | 'success' | 'error'
+export type PrintJobState =
+  | 'preflighting'
+  | 'submitting'
+  | 'verifying'
+  | 'retrying'
+  | 'succeeded'
+  | 'failed_hard'
 
-interface PrintJobState {
-  status: PrintStatus
-  error: string | null
+export interface PrintJobError {
+  reason: string
+  detail?: string
+  jobId?: number
 }
 
-type PrintJobAction = { type: 'start' } | { type: 'success' } | { type: 'error'; error: string }
+interface State {
+  state: PrintJobState
+  error: PrintJobError | null
+  attempt: number // 1 = first try, 2 = auto-retry
+}
 
-function printJobReducer(_state: PrintJobState, action: PrintJobAction): PrintJobState {
+type Action =
+  | { type: 'start_preflight' }
+  | { type: 'start_submit' }
+  | { type: 'start_verify' }
+  | { type: 'succeed' }
+  | { type: 'soft_fail'; error: PrintJobError }
+  | { type: 'hard_fail'; error: PrintJobError }
+  | { type: 'start_retry' }
+  | { type: 'manual_retry' }
+
+const initial: State = { state: 'preflighting', error: null, attempt: 1 }
+
+function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'start':
-      return { status: 'printing', error: null }
-    case 'success':
-      return { status: 'success', error: null }
-    case 'error':
-      return { status: 'error', error: action.error }
+    case 'start_preflight':
+      return { ...state, state: 'preflighting', error: null }
+    case 'start_submit':
+      return { ...state, state: 'submitting' }
+    case 'start_verify':
+      return { ...state, state: 'verifying' }
+    case 'succeed':
+      return { ...state, state: 'succeeded', error: null }
+    case 'soft_fail':
+      return { ...state, state: 'retrying', error: action.error, attempt: state.attempt + 1 }
+    case 'hard_fail':
+      return { ...state, state: 'failed_hard', error: action.error }
+    case 'start_retry':
+      return { ...state, state: 'preflighting', error: null }
+    case 'manual_retry':
+      return { state: 'preflighting', error: null, attempt: 1 }
   }
 }
 
-interface PrintJobResult {
-  status: PrintStatus
-  error: string | null
+export interface PrintJobResult {
+  state: PrintJobState
+  error: PrintJobError | null
   retry: () => void
 }
 
-/**
- * Orchestrates the print flow: reads the print sheet from the strip store,
- * sends it to the printer via the preload API, and tracks status.
- */
 export function usePrintJob(): PrintJobResult {
   const printSheetResult = useStripStore((s) => s.printSheetResult)
   const printerName = usePrinterSettingsStore((s) => s.printerName)
@@ -41,67 +69,123 @@ export function usePrintJob(): PrintJobResult {
   const colorMode = usePrinterSettingsStore((s) => s.colorMode)
   const margins = usePrinterSettingsStore((s) => s.margins)
   const copies = usePrinterSettingsStore((s) => s.copies)
+  const autoRetryOnce = usePrinterSettingsStore((s) => s.autoRetryOnce)
 
-  const [state, dispatch] = useReducer(printJobReducer, { status: 'idle', error: null })
+  const [state, dispatch] = useReducer(reducer, initial)
+  const runningRef = useRef(false)
 
-  const sendPrintJob = useCallback(async () => {
-    dispatch({ type: 'start' })
+  const runOnce = useCallback(
+    async (currentAttempt: number): Promise<void> => {
+      if (!printerName) {
+        dispatch({
+          type: 'hard_fail',
+          error: { reason: 'no_printer', detail: 'No printer configured' }
+        })
+        return
+      }
+      if (!printSheetResult?.dataUrl) {
+        dispatch({
+          type: 'hard_fail',
+          error: { reason: 'no_sheet', detail: 'Print sheet not ready' }
+        })
+        return
+      }
 
-    const imageDataUrl = printSheetResult?.dataUrl
-    if (!imageDataUrl) {
-      const msg = 'No print sheet data available'
-      logger.error('Printer', msg)
-      dispatch({ type: 'error', error: t('error.printFailed') })
-      return
-    }
+      logger.info('Printer', `Print attempt ${currentAttempt} — preflight`)
+      dispatch({ type: 'start_preflight' })
+      const availability = await window.api.printer.checkAvailability(printerName)
+      if (!availability.available) {
+        const err: PrintJobError = {
+          reason: availability.status,
+          detail: availability.detail ?? `Printer status: ${availability.status}`
+        }
+        if (currentAttempt === 1 && autoRetryOnce) {
+          logger.warn('Printer', `Preflight failed, auto-retrying: ${availability.status}`)
+          dispatch({ type: 'soft_fail', error: err })
+          return
+        }
+        logger.error('Printer', `Preflight failed (hard): ${availability.status}`)
+        dispatch({ type: 'hard_fail', error: err })
+        return
+      }
 
-    if (!printerName) {
-      logger.error('Printer', 'No printer configured')
-      dispatch({ type: 'error', error: t('error.printerNotFound') })
-      return
-    }
+      dispatch({ type: 'start_submit' })
+      logger.info('Printer', `Preflight OK, submitting print job`)
 
-    logger.info(
-      'Printer',
-      `Print job sent (printer: ${printerName}, paper: ${paperSize}, copies: ${copies})`
-    )
-
-    try {
+      const sheet = printSheetResult.dataUrl
       const result = await window.api.printer.print({
         printerName,
-        imageDataUrl,
+        imageDataUrl: sheet,
         copies,
         colorMode,
         paperSize,
         margins
       })
 
+      dispatch({ type: 'start_verify' })
+
+      // Treat unverifiable as success — UI should still navigate away.
       if (result.success) {
-        logger.info('Printer', 'Print job completed successfully')
-        dispatch({ type: 'success' })
-      } else {
-        const detail = result.error || result.reason || 'Unknown error'
-        logger.error('Printer', `Print job failed: ${detail}`)
-        dispatch({ type: 'error', error: detail })
+        logger.info(
+          'Printer',
+          `Print verified=${result.verified}${result.jobId ? ` jobId=${result.jobId}` : ''}`
+        )
+        dispatch({ type: 'succeed' })
+        return
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to send print job'
-      logger.error('Printer', `Print job error: ${msg}`)
-      dispatch({
-        type: 'error',
-        error: msg
-      })
+
+      const err: PrintJobError = {
+        reason: result.reason ?? 'unknown',
+        detail: result.error ?? result.reason ?? 'Print failed',
+        jobId: result.jobId
+      }
+      if (currentAttempt === 1 && autoRetryOnce) {
+        logger.warn('Printer', `Print failed (reason=${err.reason}), auto-retrying once`)
+        dispatch({ type: 'soft_fail', error: err })
+        return
+      }
+      logger.error('Printer', `Print failed (hard, reason=${err.reason})`)
+      dispatch({ type: 'hard_fail', error: err })
+    },
+    [printerName, printSheetResult, paperSize, colorMode, margins, copies, autoRetryOnce]
+  )
+
+  const run = useCallback(async (): Promise<void> => {
+    if (runningRef.current) return
+    runningRef.current = true
+    try {
+      await runOnce(1)
+    } finally {
+      runningRef.current = false
     }
-  }, [printSheetResult, printerName, paperSize, colorMode, margins, copies])
+  }, [runOnce])
 
-  // Send the print job on mount
+  // Effect to drive auto-retry when state === 'retrying'
   useEffect(() => {
-    sendPrintJob()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- intentionally run once on mount
+    if (state.state !== 'retrying') return
+    let cancelled = false
+    const timer = setTimeout(async () => {
+      if (cancelled) return
+      dispatch({ type: 'start_retry' })
+      await runOnce(state.attempt)
+    }, 750) // brief overlay delay for the "retrying" UI
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [state.state, state.attempt, runOnce])
 
-  return {
-    status: state.status === 'idle' ? 'printing' : state.status,
-    error: state.error,
-    retry: sendPrintJob
-  }
+  // Run once on mount
+  useEffect(() => {
+    run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const retry = useCallback(() => {
+    dispatch({ type: 'manual_retry' })
+    runningRef.current = false
+    run()
+  }, [run])
+
+  return { state: state.state, error: state.error, retry }
 }

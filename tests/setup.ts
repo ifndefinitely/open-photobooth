@@ -7,8 +7,13 @@ import { vi } from 'vitest'
 const mockApi = {
   printer: {
     getPrinters: vi.fn().mockResolvedValue([]),
-    checkAvailability: vi.fn().mockResolvedValue({ available: true, status: 'ready' }),
-    print: vi.fn().mockResolvedValue({ success: true })
+    checkAvailability: vi.fn().mockResolvedValue({
+      available: true,
+      status: 'ready',
+      detail: 'Ready (code 3)',
+      rawStatusCode: 3
+    }),
+    print: vi.fn().mockResolvedValue({ success: true, verified: true })
   },
   settings: {
     get: vi.fn().mockResolvedValue(null),

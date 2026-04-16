@@ -365,6 +365,7 @@ printer.error.paperJam         → "There's a paper jam"
 printer.error.offline          → "The printer isn't responding"
 printer.error.needsAttention   → "The printer needs attention"
 printer.error.verificationTimeout → "The print is taking longer than expected"
+printer.error.stalledInSpooler → "The printer may be asleep — press and hold the power button to wake it"
 printer.error.buttonRetry      → "Try again"
 printer.error.buttonSkip       → "Save for later"
 printer.error.buttonAdmin      → "Admin"
@@ -428,7 +429,7 @@ On the Windows tablet with the real SELPHY CP1500:
 ### Risks
 
 1. **PowerShell spawn cost on low-spec tablet.** Assumption: ~200ms per invocation. Could be 1–2s on the target hardware. Mitigation: measure in BP.1; use `pwsh` (PS7) if installed; bump `healthPollInterval` default to 30s if needed.
-2. **PowerSave wake behaviour (code 21).** The biggest unknown. Does `Get-Printer` alone wake the SELPHY? Validate early in BP.1. Fallback: `Resume-PrintJob` or spooler nudge.
+2. **~~PowerSave wake behaviour (code 21).~~** **RESOLVED (2026-04-16):** The Canon SELPHY CP1500 reports `PrinterStatus: 0` ("ready") even during deep sleep — code 21 is never observed. The pre-flight patience window for `warmingUp` cannot detect this. Mitigation: an early-abort heuristic in `waitForJobCompletion` detects jobs stuck in `Spooling` for 20s without transitioning to `Printing` and returns `stalled_in_spooler`. The `PrinterErrorDialog` shows actionable guidance: "press and hold the power button to wake it." Disabling auto-off on the SELPHY avoids the issue entirely.
 3. **Document name propagation.** Verify in BP.3 that `<title>` on the print document HTML actually propagates to the spool job `DocumentName`. Queue diff by ID is primary correlation; doc name is belt-and-braces fallback.
 4. **IPC log bridge startup ordering.** Main-process logs before renderer ready. Buffer ~500 lines, flush on first renderer connection.
 5. **`PrintResult` shape change backward compatibility.** Existing test mocks on `window.api.printer.*` must still work with added `verified` / `jobId` / `reason` fields. Check in BP.1 before merging.

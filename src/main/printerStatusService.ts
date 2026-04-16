@@ -303,18 +303,28 @@ export type JobWaitResult =
 
 const BAD_JOB_LABELS = new Set(['Error', 'PaperOut', 'UserIntervention', 'Paused'])
 
+// A healthy printer transitions from Spooling to Printing within a few seconds.
+// If the job stays in Spooling without ever reaching Printing for this long,
+// the hardware is likely asleep or the driver is in a zombie state.
+// (Canon SELPHY CP1500 reports PrinterStatus 0 "ready" even during deep sleep,
+// so this stall detection is the only way to catch it quickly.)
+const STALLED_IN_SPOOLER_MS = 20_000
+
 export async function waitForJobCompletion(
   printerName: string,
   jobId: number,
-  options: WaitForJobOptions
+  options: WaitForJobOptions,
+  getJobsFn: (name: string) => Promise<PrintJob[]> = getJobs
 ): Promise<JobWaitResult> {
   if (!isWindows()) return { verified: true }
 
   const deadline = Date.now() + options.timeoutMs
   let lastLabels: string[] = []
+  let firstSeenSpoolingAt: number | null = null
+  let everSeenPrinting = false
 
   while (Date.now() < deadline) {
-    const jobs = await getJobs(printerName)
+    const jobs = await getJobsFn(printerName)
     const job = jobs.find((j) => j.id === jobId)
 
     if (!job) {
@@ -326,6 +336,25 @@ export async function waitForJobCompletion(
     const bad = lastLabels.find((l) => BAD_JOB_LABELS.has(l))
     if (bad) {
       return { verified: false, reason: labelToReason(bad), lastLabels }
+    }
+
+    // Track whether the job has ever reached Printing state.
+    if (lastLabels.includes('Printing')) {
+      everSeenPrinting = true
+    }
+
+    // Early abort: job stuck in Spooling without ever reaching Printing.
+    if (!everSeenPrinting && lastLabels.includes('Spooling')) {
+      if (firstSeenSpoolingAt === null) {
+        firstSeenSpoolingAt = Date.now()
+      } else if (Date.now() - firstSeenSpoolingAt >= STALLED_IN_SPOOLER_MS) {
+        loggingService.log(
+          'WARN',
+          'Printer',
+          `Job ${jobId} stalled in Spooling for ${STALLED_IN_SPOOLER_MS / 1000}s without reaching Printing — aborting early`
+        )
+        return { verified: false, reason: 'stalled_in_spooler', lastLabels }
+      }
     }
 
     await sleep(options.pollIntervalMs)

@@ -80,8 +80,9 @@ export function usePrintJob(): PrintJobResult {
         logger.info('Printer', 'Print job completed successfully')
         dispatch({ type: 'success' })
       } else {
-        logger.error('Printer', `Print job failed: ${result.error || 'Unknown error'}`)
-        dispatch({ type: 'error', error: result.error || 'Unknown print error' })
+        const detail = result.error || result.reason || 'Unknown error'
+        logger.error('Printer', `Print job failed: ${detail}`)
+        dispatch({ type: 'error', error: detail })
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to send print job'

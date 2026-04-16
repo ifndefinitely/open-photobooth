@@ -41,7 +41,21 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   })
 
   ipcMain.handle('printer:print', async (_event, options: PrintOptions) => {
-    return print(options)
+    const verifyTimeout = settingsService.get('printer.verificationTimeout')
+    const verifyInterval = settingsService.get('printer.verificationPollInterval')
+    const timeoutSec =
+      typeof verifyTimeout === 'number' && Number.isFinite(verifyTimeout) && verifyTimeout > 0
+        ? verifyTimeout
+        : 90
+    const intervalSec =
+      typeof verifyInterval === 'number' && Number.isFinite(verifyInterval) && verifyInterval > 0
+        ? verifyInterval
+        : 2
+    return print({
+      ...options,
+      verificationTimeoutMs: timeoutSec * 1000,
+      verificationPollIntervalMs: intervalSec * 1000
+    })
   })
 
   // ── Settings ──

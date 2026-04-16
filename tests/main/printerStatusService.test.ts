@@ -1,12 +1,20 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   parseGetPrinterOutput,
   parseGetJobsOutput,
   mapStatusCode,
   decodeJobStatus,
   statusDetail,
-  type PrinterState
+  waitForJobCompletion,
+  type PrinterState,
+  type PrintJob
 } from '../../src/main/printerStatusService'
+
+vi.mock('../../src/main/loggingService', () => ({
+  log: vi.fn(),
+  init: vi.fn(),
+  getLogPath: vi.fn()
+}))
 
 describe('printerStatusService — parseGetPrinterOutput', () => {
   it('parses a compressed JSON status payload from PowerShell', () => {
@@ -121,5 +129,152 @@ describe('printerStatusService — statusDetail', () => {
     expect(statusDetail('busy', 4)).toBe('Busy (code 4)')
     expect(statusDetail('offline', 7)).toBe('Offline (code 7)')
     expect(statusDetail('error', 9)).toBe('Error (code 9)')
+  })
+})
+
+describe('waitForJobCompletion — stall detection', () => {
+  const originalPlatform = process.platform
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    Object.defineProperty(process, 'platform', { value: 'win32' })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    Object.defineProperty(process, 'platform', { value: originalPlatform })
+  })
+
+  const spoolingJob: PrintJob = {
+    id: 42,
+    documentName: 'openphotobooth-test',
+    submittedTime: '',
+    jobStatus: 8,
+    jobStatusLabels: ['Spooling']
+  }
+
+  const printingJob: PrintJob = {
+    id: 42,
+    documentName: 'openphotobooth-test',
+    submittedTime: '',
+    jobStatus: 16,
+    jobStatusLabels: ['Printing']
+  }
+
+  it('aborts early when job is stuck in Spooling for 20s without Printing', async () => {
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValue([spoolingJob])
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      {
+        timeoutMs: 90_000,
+        pollIntervalMs: 2_000
+      },
+      mockGetJobs
+    )
+
+    // Advance past the 20s stall threshold (11 polls at 2s each = 22s)
+    for (let i = 0; i < 11; i++) {
+      await vi.advanceTimersByTimeAsync(2_000)
+    }
+
+    const result = await promise
+    expect(result.verified).toBe(false)
+    if (!result.verified) {
+      expect(result.reason).toBe('stalled_in_spooler')
+      expect(result.lastLabels).toContain('Spooling')
+    }
+  })
+
+  it('does not stall-abort if job transitions to Printing', async () => {
+    // First 3 polls: Spooling. Then transitions to Printing. Then drains.
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValueOnce([spoolingJob])
+      .mockResolvedValueOnce([spoolingJob])
+      .mockResolvedValueOnce([spoolingJob])
+      .mockResolvedValueOnce([printingJob])
+      .mockResolvedValueOnce([printingJob])
+      .mockResolvedValue([]) // job drained
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      {
+        timeoutMs: 90_000,
+        pollIntervalMs: 2_000
+      },
+      mockGetJobs
+    )
+
+    for (let i = 0; i < 6; i++) {
+      await vi.advanceTimersByTimeAsync(2_000)
+    }
+
+    const result = await promise
+    expect(result.verified).toBe(true)
+  })
+
+  it('returns verified true when job drains from queue', async () => {
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValueOnce([printingJob])
+      .mockResolvedValueOnce([printingJob])
+      .mockResolvedValue([]) // job drained
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      {
+        timeoutMs: 90_000,
+        pollIntervalMs: 2_000
+      },
+      mockGetJobs
+    )
+
+    for (let i = 0; i < 3; i++) {
+      await vi.advanceTimersByTimeAsync(2_000)
+    }
+
+    const result = await promise
+    expect(result.verified).toBe(true)
+  })
+
+  it('detects bad job status even while tracking spooling stall', async () => {
+    const paperOutJob: PrintJob = {
+      id: 42,
+      documentName: 'openphotobooth-test',
+      submittedTime: '',
+      jobStatus: 64,
+      jobStatusLabels: ['PaperOut']
+    }
+
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValueOnce([spoolingJob])
+      .mockResolvedValueOnce([paperOutJob])
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      {
+        timeoutMs: 90_000,
+        pollIntervalMs: 2_000
+      },
+      mockGetJobs
+    )
+
+    for (let i = 0; i < 2; i++) {
+      await vi.advanceTimersByTimeAsync(2_000)
+    }
+
+    const result = await promise
+    expect(result.verified).toBe(false)
+    if (!result.verified) {
+      expect(result.reason).toBe('paper_out')
+    }
   })
 })

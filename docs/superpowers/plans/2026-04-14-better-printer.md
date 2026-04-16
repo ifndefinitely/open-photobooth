@@ -2926,6 +2926,22 @@ git commit -m "feat(review): save-only path for captureOnly offline mode"
 
 **Why this is big:** It's the heart of the retry/error UX and is the most complex renderer change. It replaces the old `usePrintJob` entirely and introduces the `PrinterErrorDialog`.
 
+> **Hardware finding (2026-04-16):** The Canon SELPHY CP1500 reports `PrinterStatus: 0` ("ready")
+> even when in deep sleep. The spec assumed code 21 (PowerSave) — that assumption was wrong.
+> The pre-flight patience window for `warmingUp` is therefore useless for detecting sleep.
+> Verification is the actual safety net: it catches phantom success via job-queue polling.
+>
+> An early-abort heuristic was added to `waitForJobCompletion`: if a job is stuck in
+> `Spooling` for 20s without ever transitioning to `Printing`, it returns
+> `reason: 'stalled_in_spooler'` instead of waiting the full 90s verification timeout.
+> A healthy SELPHY transitions Spooling → Printing within a few seconds.
+>
+> **Operator guidance:** When the `PrinterErrorDialog` shows `stalled_in_spooler` or
+> `verification_timeout`, the user-facing message should say something like
+> "The printer may be asleep — press and hold the power button to wake it."
+> This is more actionable than a generic timeout message. The i18n key
+> `printer.error.stalledInSpooler` is added for this.
+
 **Files:**
 
 - Rewrite: `src/renderer/src/hooks/usePrintJob.ts`
@@ -3362,6 +3378,7 @@ const REASON_KEY_MAP: Record<string, string> = {
   error: 'printer.error.offline',
   not_found: 'printer.error.offline',
   verification_timeout: 'printer.error.verificationTimeout',
+  stalled_in_spooler: 'printer.error.stalledInSpooler',
   no_printer: 'printer.error.offline'
 }
 
@@ -3904,6 +3921,7 @@ describe('i18n completeness', () => {
     'printer.error.offline',
     'printer.error.needsAttention',
     'printer.error.verificationTimeout',
+    'printer.error.stalledInSpooler',
     'printer.error.buttonRetry',
     'printer.error.buttonSkip',
     'printer.error.buttonAdmin',
@@ -3944,6 +3962,7 @@ Edit `src/renderer/src/i18n/en.json`. Add these key-value pairs (insert before t
   "printer.error.offline": "The printer isn't responding",
   "printer.error.needsAttention": "The printer needs attention",
   "printer.error.verificationTimeout": "The print is taking longer than expected",
+  "printer.error.stalledInSpooler": "The printer may be asleep — press and hold the power button to wake it",
   "printer.error.buttonRetry": "Try again",
   "printer.error.buttonSkip": "Save for later",
   "printer.error.buttonAdmin": "Admin",
@@ -3971,6 +3990,7 @@ Edit `src/renderer/src/i18n/nl.json`. Add the matching pairs:
   "printer.error.offline": "De printer reageert niet",
   "printer.error.needsAttention": "De printer heeft aandacht nodig",
   "printer.error.verificationTimeout": "De afdruk duurt langer dan verwacht",
+  "printer.error.stalledInSpooler": "De printer slaapt mogelijk — houd de aan/uit-knop ingedrukt om hem te wekken",
   "printer.error.buttonRetry": "Opnieuw proberen",
   "printer.error.buttonSkip": "Later bewaren",
   "printer.error.buttonAdmin": "Beheer",
@@ -4166,7 +4186,7 @@ git commit -m "feat(dev): mock printer status override for testing without hardw
 
 Create `docs/superpowers/acceptance/2026-04-14-better-printer.md`:
 
-````markdown
+```markdown
 # Better Printer — Manual Hardware Acceptance
 
 **Hardware:** Windows 11 tablet (kiosk target), Canon SELPHY CP1500 via USB.
@@ -4177,8 +4197,8 @@ Create `docs/superpowers/acceptance/2026-04-14-better-printer.md`:
 
 - [ ] Time a single `Get-Printer` invocation on the tablet:
       `powershell
-    Measure-Command { Get-Printer -Name "Canon SELPHY CP1500" | Select-Object Name,PrinterStatus,JobCount | ConvertTo-Json -Compress }
-    `
+Measure-Command { Get-Printer -Name "Canon SELPHY CP1500" | Select-Object Name,PrinterStatus,JobCount | ConvertTo-Json -Compress }
+`
 - [ ] Time it 10 times, record median.
 - [ ] If median > 1 second: bump `printer.healthPollInterval` default from 10 to 30 seconds (edit `DEFAULTS.printer.healthPollInterval` in `settingsService.ts`). Record the measurement in this file.
 - [ ] Check whether `pwsh` (PowerShell 7) is installed (`pwsh -Version`). If available and measurably faster, change the spawn in `printerStatusService.ts` from `'powershell.exe'` to prefer `pwsh.exe` when on PATH. Fall back to `powershell.exe` on ENOENT.
@@ -4251,7 +4271,7 @@ Create `docs/superpowers/acceptance/2026-04-14-better-printer.md`:
 Record any issues found here. Any fixes should ship as a follow-up commit _inside_ this task with a clear message referencing the acceptance item.
 
 - [ ] …
-````
+```
 
 - [ ] Step 15.2: Commit the checklist
 

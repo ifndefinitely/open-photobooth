@@ -14,8 +14,13 @@ vi.mock('../../src/main/loggingService', () => ({
   getLogPath: vi.fn()
 }))
 
+vi.mock('../../src/main/printerSpooler', () => ({
+  submitToSpooler: vi.fn()
+}))
+
 import * as statusService from '../../src/main/printerStatusService'
-import { checkPrinterAvailability } from '../../src/main/printerService'
+import * as spooler from '../../src/main/printerSpooler'
+import { checkPrinterAvailability, print } from '../../src/main/printerService'
 
 const mockWindow = {
   webContents: {
@@ -107,5 +112,112 @@ describe('checkPrinterAvailability', () => {
     expect(result.available).toBe(false)
     expect(result.status).toBe('not_found')
     expect(vi.mocked(statusService.waitForReady)).not.toHaveBeenCalled()
+  })
+})
+
+const printOptions = {
+  printerName: 'Canon SELPHY CP1500',
+  imageDataUrl: 'data:image/png;base64,mockmock',
+  copies: 1,
+  colorMode: 'color' as const,
+  paperSize: '4x6',
+  margins: { top: 0, right: 0, bottom: 0, left: 0 },
+  sessionId: 'abc123',
+  verificationTimeoutMs: 90_000,
+  verificationPollIntervalMs: 2_000
+}
+
+describe('print() — verification', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('verified success — queue diff finds job, drains cleanly', async () => {
+    vi.mocked(spooler.submitToSpooler).mockResolvedValue({ success: true })
+
+    const jobBefore = {
+      id: 41,
+      documentName: 'old',
+      submittedTime: '',
+      jobStatus: 16,
+      jobStatusLabels: ['Printing']
+    }
+    const jobNew = {
+      id: 42,
+      documentName: 'openphotobooth-abc123',
+      submittedTime: '',
+      jobStatus: 16,
+      jobStatusLabels: ['Printing']
+    }
+    vi.mocked(statusService.getJobs)
+      .mockResolvedValueOnce([jobBefore])
+      .mockResolvedValueOnce([jobBefore, jobNew])
+
+    vi.mocked(statusService.waitForJobCompletion).mockResolvedValue({ verified: true })
+
+    const result = await print(printOptions)
+
+    expect(result.success).toBe(true)
+    expect(result.verified).toBe(true)
+    expect(result.jobId).toBe(42)
+    expect(result.reason).toBeUndefined()
+    expect(vi.mocked(spooler.submitToSpooler)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentName: 'openphotobooth-abc123',
+        printerName: 'Canon SELPHY CP1500'
+      })
+    )
+  })
+
+  it('unverifiable — queue diff finds no new job', async () => {
+    vi.mocked(spooler.submitToSpooler).mockResolvedValue({ success: true })
+    vi.mocked(statusService.getJobs).mockResolvedValue([])
+
+    const result = await print(printOptions)
+
+    expect(result.success).toBe(true)
+    expect(result.verified).toBe(false)
+    expect(result.reason).toBe('unverifiable')
+  }, 10_000)
+
+  it('paper_out — waitForJobCompletion reports failure', async () => {
+    vi.mocked(spooler.submitToSpooler).mockResolvedValue({ success: true })
+
+    vi.mocked(statusService.getJobs)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 42,
+          documentName: 'openphotobooth-abc123',
+          submittedTime: '',
+          jobStatus: 16,
+          jobStatusLabels: ['Printing']
+        }
+      ])
+
+    vi.mocked(statusService.waitForJobCompletion).mockResolvedValue({
+      verified: false,
+      reason: 'paper_out',
+      lastLabels: ['PaperOut']
+    })
+
+    const result = await print(printOptions)
+
+    expect(result.success).toBe(false)
+    expect(result.verified).toBe(false)
+    expect(result.reason).toBe('paper_out')
+    expect(result.jobId).toBe(42)
+  })
+
+  it('spooler failure — webContents.print itself fails', async () => {
+    vi.mocked(spooler.submitToSpooler).mockResolvedValue({ success: false, reason: 'driver_error' })
+    vi.mocked(statusService.getJobs).mockResolvedValue([])
+
+    const result = await print(printOptions)
+
+    expect(result.success).toBe(false)
+    expect(result.verified).toBe(false)
+    expect(result.reason).toBe('driver_error')
+    expect(vi.mocked(statusService.waitForJobCompletion)).not.toHaveBeenCalled()
   })
 })

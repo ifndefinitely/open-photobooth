@@ -9,6 +9,8 @@ export interface PrinterInfo {
 export interface PrinterAvailability {
   available: boolean
   status: string
+  detail?: string
+  rawStatusCode?: number
 }
 
 export interface PrintOptions {
@@ -18,10 +20,14 @@ export interface PrintOptions {
   colorMode: 'color' | 'grayscale'
   paperSize: string
   margins: { top: number; right: number; bottom: number; left: number }
+  sessionId?: string
 }
 
 export interface PrintResult {
   success: boolean
+  verified: boolean
+  jobId?: number
+  reason?: string
   error?: string
 }
 

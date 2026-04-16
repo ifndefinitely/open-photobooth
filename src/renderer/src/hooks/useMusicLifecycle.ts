@@ -9,9 +9,9 @@ import {
   fadeInMusic,
   fadeOutMusic,
   setMusicVolume,
-  isMusicPlaying,
-  MUSIC_TRACKS
+  isMusicPlaying
 } from '@/services/audioService'
+import { getActiveMusicTracks } from '@/services/musicLibraryService'
 
 /**
  * Determines whether music should be playing for the given screen and mode.
@@ -85,19 +85,29 @@ export function useMusicLifecycle(): void {
 /**
  * Compare desired state (should music play?) with actual state (is music playing?)
  * and fade in/out accordingly.
+ *
+ * Async because `getActiveMusicTracks()` resolves via IPC. The post-await
+ * re-check prevents a race where two back-to-back state changes both start
+ * a playMusic() call.
  */
-function reconcile(): void {
+async function reconcile(): Promise<void> {
   const screen = useNavigationStore.getState().currentScreen
   const mode = useAppSettingsStore.getState().audioMusicMode
   const want = shouldPlayMusic(screen, mode)
   const playing = isMusicPlaying()
 
   if (want && !playing) {
-    // Start or resume music with a fade-in
-    if (!isMusicPlaying()) {
-      playMusic(MUSIC_TRACKS)
+    const tracks = await getActiveMusicTracks()
+    if (
+      !isMusicPlaying() &&
+      shouldPlayMusic(
+        useNavigationStore.getState().currentScreen,
+        useAppSettingsStore.getState().audioMusicMode
+      )
+    ) {
+      playMusic(tracks)
+      fadeInMusic()
     }
-    fadeInMusic()
   } else if (!want && playing) {
     fadeOutMusic()
   }

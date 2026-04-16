@@ -47,6 +47,7 @@ interface SettingsSchema {
     countdownBeep: boolean
     shutterSound: boolean
     flashEffect: boolean
+    customMusicTracks: string[]
   }
   pin: {
     code: string
@@ -109,7 +110,8 @@ const DEFAULTS: SettingsSchema = {
     musicVolume: 50,
     countdownBeep: true,
     shutterSound: true,
-    flashEffect: true
+    flashEffect: true,
+    customMusicTracks: []
   },
   pin: {
     code: '0000'

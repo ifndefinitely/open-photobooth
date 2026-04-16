@@ -7,6 +7,9 @@ import type { SaveSessionData } from './storageService'
 import * as loggingService from './loggingService'
 import type { LogLevel } from './loggingService'
 import * as kioskService from './kioskService'
+import * as musicLibraryService from './musicLibraryService'
+import { MusicLibraryError } from './musicLibraryService'
+import type { ImportErrorReason } from './musicLibraryService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -139,5 +142,68 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('logging:getLogPath', () => {
     return loggingService.getLogPath()
+  })
+
+  // ── Music Library ──
+
+  ipcMain.handle('musicLibrary:pickAndImport', async () => {
+    const dialogResult = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      title: 'Import music file',
+      filters: [{ name: 'Audio', extensions: ['mp3', 'wav'] }]
+    })
+    if (dialogResult.canceled || dialogResult.filePaths.length === 0) {
+      return { ok: false, reason: 'cancelled' as const }
+    }
+    const sourcePath = dialogResult.filePaths[0]
+
+    try {
+      const { storedFilename } = await musicLibraryService.importTrackFile(sourcePath)
+
+      const current = (settingsService.get('audio.customMusicTracks') as string[] | undefined) ?? []
+      settingsService.set('audio.customMusicTracks', [...current, storedFilename])
+
+      const [track] = await musicLibraryService.listTracks([storedFilename])
+      if (!track) {
+        settingsService.set('audio.customMusicTracks', current)
+        return { ok: false, reason: 'io-error' as const, message: 'Imported file disappeared' }
+      }
+
+      return { ok: true as const, track }
+    } catch (err) {
+      if (err instanceof MusicLibraryError) {
+        return {
+          ok: false as const,
+          reason: err.reason as ImportErrorReason,
+          message: err.message
+        }
+      }
+      loggingService.log(
+        'ERROR',
+        'music-library',
+        `pickAndImport unexpected error: ${(err as Error).message}`
+      )
+      return { ok: false as const, reason: 'io-error' as const, message: (err as Error).message }
+    }
+  })
+
+  ipcMain.handle('musicLibrary:remove', async (_event, filename: string) => {
+    await musicLibraryService.deleteTrackFile(filename)
+    const current = (settingsService.get('audio.customMusicTracks') as string[] | undefined) ?? []
+    settingsService.set(
+      'audio.customMusicTracks',
+      current.filter((f) => f !== filename)
+    )
+  })
+
+  ipcMain.handle('musicLibrary:resolveActive', async () => {
+    const list = (settingsService.get('audio.customMusicTracks') as string[] | undefined) ?? []
+    const tracks = await musicLibraryService.listTracks(list)
+    return tracks.map((t) => t.url)
+  })
+
+  ipcMain.handle('musicLibrary:list', async () => {
+    const list = (settingsService.get('audio.customMusicTracks') as string[] | undefined) ?? []
+    return musicLibraryService.listTracks(list)
   })
 }

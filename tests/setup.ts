@@ -38,6 +38,12 @@ const mockApi = {
   },
   kiosk: {
     setAdminPanelOpen: vi.fn().mockResolvedValue(undefined)
+  },
+  musicLibrary: {
+    pickAndImport: vi.fn().mockResolvedValue({ ok: false, reason: 'cancelled' }),
+    remove: vi.fn().mockResolvedValue(undefined),
+    resolveActive: vi.fn().mockResolvedValue([]),
+    list: vi.fn().mockResolvedValue([])
   }
 }
 

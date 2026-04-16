@@ -1,0 +1,31 @@
+.pill {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.amber {
+  background: #f59f00;
+  color: #000;
+}
+
+.red {
+  background: #d9534f;
+  color: #fff;
+}
+
+.icon {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}

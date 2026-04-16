@@ -138,3 +138,66 @@
   background: var(--admin-danger-bg);
   color: var(--admin-danger-text);
 }
+
+.subgroup {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.subgroupTitle {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+  color: #aaa;
+}
+
+.liveStatusRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.liveLabel {
+  font-weight: 700;
+}
+
+.liveBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.live_ready,
+.live_busy {
+  background: #2ea043;
+  color: #fff;
+}
+.live_warmingUp {
+  background: #f59f00;
+  color: #000;
+}
+.live_offline,
+.live_error {
+  background: #d9534f;
+  color: #fff;
+}
+.live_unknown {
+  background: #555;
+  color: #fff;
+}
+
+.liveDetail {
+  flex: 1;
+  color: #bbb;
+  font-family: monospace;
+  font-size: 13px;
+}

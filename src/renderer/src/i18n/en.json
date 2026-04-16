@@ -43,5 +43,25 @@
 
   "idle.returning": "Returning to home in {seconds}s...",
 
-  "common.back": "Back"
+  "common.back": "Back",
+
+  "printer.status.warmingUp": "Printer warming up...",
+  "printer.status.printing": "Printing your strip...",
+  "printer.status.verifying": "Almost done...",
+  "printer.status.retrying": "One moment, trying again...",
+  "printer.error.title": "Print didn't finish",
+  "printer.error.paperOut": "The printer needs more paper",
+  "printer.error.paperJam": "There's a paper jam",
+  "printer.error.offline": "The printer isn't responding",
+  "printer.error.needsAttention": "The printer needs attention",
+  "printer.error.verificationTimeout": "The print is taking longer than expected",
+  "printer.error.stalledInSpooler": "The printer may be asleep — press and hold the power button to wake it",
+  "printer.error.buttonRetry": "Try again",
+  "printer.error.buttonSkip": "Save for later",
+  "printer.error.buttonAdmin": "Admin",
+  "home.printer.unavailable.halt": "Printer unavailable — please see the host",
+  "home.printer.unavailable.captureOnly": "Printer offline — your strip will be saved for later",
+  "review.button.saveOnly": "Save",
+  "thankyou.title.saved": "Your strip has been saved!",
+  "thankyou.subtitle.saved": "The host will print it for you later."
 }

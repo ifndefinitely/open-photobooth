@@ -7,8 +7,21 @@ import { vi } from 'vitest'
 const mockApi = {
   printer: {
     getPrinters: vi.fn().mockResolvedValue([]),
-    checkAvailability: vi.fn().mockResolvedValue({ available: true, status: 'ready' }),
-    print: vi.fn().mockResolvedValue({ success: true })
+    checkAvailability: vi.fn().mockResolvedValue({
+      available: true,
+      status: 'ready',
+      detail: 'Ready (code 3)',
+      rawStatusCode: 3
+    }),
+    print: vi.fn().mockResolvedValue({ success: true, verified: true }),
+    getStatus: vi.fn().mockResolvedValue({
+      name: '',
+      state: 'ready',
+      rawStatusCode: 3,
+      jobCount: 0,
+      detail: 'Ready (code 3)',
+      queriedAt: Date.now()
+    })
   },
   settings: {
     get: vi.fn().mockResolvedValue(null),
@@ -34,7 +47,9 @@ const mockApi = {
   },
   logging: {
     log: vi.fn().mockResolvedValue(undefined),
-    getLogPath: vi.fn().mockResolvedValue('/tmp/logs')
+    getLogPath: vi.fn().mockResolvedValue('/tmp/logs'),
+    getRecent: vi.fn().mockResolvedValue([]),
+    onMirror: vi.fn().mockReturnValue(() => {})
   },
   kiosk: {
     setAdminPanelOpen: vi.fn().mockResolvedValue(undefined)
@@ -44,6 +59,9 @@ const mockApi = {
     remove: vi.fn().mockResolvedValue(undefined),
     resolveActive: vi.fn().mockResolvedValue([]),
     list: vi.fn().mockResolvedValue([])
+  },
+  __dev: {
+    setMockPrinterStatus: vi.fn().mockResolvedValue(undefined)
   }
 }
 

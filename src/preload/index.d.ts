@@ -9,6 +9,8 @@ export interface PrinterInfo {
 export interface PrinterAvailability {
   available: boolean
   status: string
+  detail?: string
+  rawStatusCode?: number
 }
 
 export interface PrintOptions {
@@ -18,17 +20,33 @@ export interface PrintOptions {
   colorMode: 'color' | 'grayscale'
   paperSize: string
   margins: { top: number; right: number; bottom: number; left: number }
+  sessionId?: string
 }
 
 export interface PrintResult {
   success: boolean
+  verified: boolean
+  jobId?: number
+  reason?: string
   error?: string
+}
+
+export type PrinterState = 'ready' | 'busy' | 'warmingUp' | 'offline' | 'error'
+
+export interface PrinterStatus {
+  name: string
+  state: PrinterState
+  rawStatusCode: number
+  jobCount: number
+  detail: string
+  queriedAt: number
 }
 
 export interface PrinterAPI {
   getPrinters: () => Promise<PrinterInfo[]>
   checkAvailability: (printerName: string) => Promise<PrinterAvailability>
   print: (options: PrintOptions) => Promise<PrintResult>
+  getStatus: (printerName: string) => Promise<PrinterStatus>
 }
 
 export interface SettingsAPI {
@@ -97,9 +115,26 @@ export interface GalleryAPI {
   getDefaultPath: () => Promise<string>
 }
 
+export type LogLevel = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG'
+
+export interface LogEntry {
+  timestamp: string
+  level: LogLevel
+  source: string
+  message: string
+}
+
+export interface GetRecentOptions {
+  limit: number
+  source?: string
+  level?: LogLevel
+}
+
 export interface LoggingAPI {
   log: (level: string, source: string, message: string) => Promise<void>
   getLogPath: () => Promise<string>
+  getRecent: (options: GetRecentOptions) => Promise<LogEntry[]>
+  onMirror: (handler: (entry: LogEntry) => void) => () => void
 }
 
 export interface KioskAPI {
@@ -127,6 +162,12 @@ export interface MusicLibraryAPI {
   list: () => Promise<MusicLibraryTrack[]>
 }
 
+export interface DevAPI {
+  setMockPrinterStatus: (
+    override: null | { state: string; rawStatusCode: number; detail: string }
+  ) => Promise<void>
+}
+
 export interface API {
   printer: PrinterAPI
   settings: SettingsAPI
@@ -134,6 +175,7 @@ export interface API {
   kiosk: KioskAPI
   gallery: GalleryAPI
   musicLibrary: MusicLibraryAPI
+  __dev: DevAPI
 }
 
 declare global {

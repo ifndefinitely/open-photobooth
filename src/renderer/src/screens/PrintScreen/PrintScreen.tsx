@@ -1,68 +1,58 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useStripStore } from '@/stores/stripStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { usePrintJob } from '@/hooks/usePrintJob'
+import PrinterErrorDialog from '@/components/PrinterErrorDialog/PrinterErrorDialog'
 import { useT } from '@/i18n'
 import styles from './PrintScreen.module.css'
-
-const LONG_WAIT_THRESHOLD_MS = 60_000
 
 function PrintScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
   const printSheetResult = useStripStore((s) => s.printSheetResult)
-  const printerName = usePrinterSettingsStore((s) => s.printerName)
-  const paperSize = usePrinterSettingsStore((s) => s.paperSize)
+  const verificationTimeout = usePrinterSettingsStore((s) => s.verificationTimeout)
 
-  const { status, error, retry } = usePrintJob()
-  const [showLongWait, setShowLongWait] = useState(false)
+  const { state, error, retry } = usePrintJob()
   const t = useT()
 
-  // Show secondary message after 60 seconds of printing
+  // Auto-advance to thank-you on success
   useEffect(() => {
-    if (status !== 'printing') return
-    const timer = setTimeout(() => setShowLongWait(true), LONG_WAIT_THRESHOLD_MS)
-    return () => clearTimeout(timer)
-  }, [status])
-
-  // Auto-navigate to thank you on success
-  useEffect(() => {
-    if (status !== 'success') return
+    if (state !== 'succeeded') return
     const timer = setTimeout(() => navigateTo('thankyou'), 1500)
     return () => clearTimeout(timer)
-  }, [status, navigateTo])
+  }, [state, navigateTo])
 
-  // Printing state
-  if (status === 'printing') {
-    return (
-      <div className={styles.container}>
-        <div className={styles.glowRing}>
-          {printSheetResult?.dataUrl && (
-            <img
-              className={styles.stripPreview}
-              src={printSheetResult.dataUrl}
-              alt="Your photo strip"
-            />
-          )}
-        </div>
-        <div className={styles.messageArea}>
-          <p className={styles.message}>{t('print.printing')}</p>
-          <div className={styles.dots}>
-            <span className={styles.dot} />
-            <span className={styles.dot} />
-            <span className={styles.dot} />
-          </div>
-        </div>
-        <p className={styles.helpHint}>{t('print.helpHint')}</p>
-        {showLongWait && <p className={styles.secondaryMessage}>{t('print.stillPrinting')}</p>}
-      </div>
-    )
-  }
+  const messageKey =
+    state === 'preflighting'
+      ? 'printer.status.warmingUp'
+      : state === 'submitting'
+        ? 'print.printing'
+        : state === 'verifying'
+          ? 'printer.status.printing'
+          : state === 'retrying'
+            ? 'printer.status.retrying'
+            : state === 'succeeded'
+              ? 'print.success'
+              : 'printer.error.title'
 
-  // Success state (brief)
-  if (status === 'success') {
-    return (
-      <div className={styles.container}>
+  const progressPercent = Math.min(
+    100,
+    state === 'preflighting'
+      ? 15
+      : state === 'submitting'
+        ? 35
+        : state === 'verifying'
+          ? 75
+          : state === 'retrying'
+            ? 25
+            : state === 'succeeded'
+              ? 100
+              : 0
+  )
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.glowRing}>
         {printSheetResult?.dataUrl && (
           <img
             className={styles.stripPreview}
@@ -70,38 +60,19 @@ function PrintScreen(): React.JSX.Element {
             alt="Your photo strip"
           />
         )}
-        <div className={styles.successIcon} aria-hidden="true">
-          ✓
-        </div>
-        <p className={styles.message}>{t('print.success')}</p>
       </div>
-    )
-  }
 
-  // Error state
-  return (
-    <div className={styles.container}>
-      <div className={styles.errorContainer}>
-        <h1 className={styles.errorTitle}>{t('error.title')}</h1>
-        <p className={styles.errorMessage}>{t('error.printFailed')}</p>
-        <p className={styles.errorCta}>{t('error.contactOwner')}</p>
-
-        <details className={styles.errorDetails}>
-          <summary className={styles.errorDetailsSummary}>{t('error.debugDetails')}</summary>
-          <div className={styles.errorDetailsContent}>
-            {`Error: ${error}\nPrinter: ${printerName || '(none)'}\nPaper size: ${paperSize}\nTime: ${new Date().toISOString()}`}
-          </div>
-        </details>
-
-        <div className={styles.errorActions}>
-          <button className={styles.button} onClick={retry}>
-            {t('error.tryAgain')}
-          </button>
-          <button className={styles.buttonSecondary} onClick={() => navigateTo('review')}>
-            {t('common.back')}
-          </button>
+      <div className={styles.messageArea}>
+        <p className={styles.message}>{t(messageKey)}</p>
+        <div className={styles.progressBar} aria-hidden="true">
+          <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
         </div>
+        <p className={styles.timingHint}>
+          {t('print.stillPrinting')} ({verificationTimeout}s max)
+        </p>
       </div>
+
+      {state === 'failed_hard' && error && <PrinterErrorDialog error={error} onRetry={retry} />}
     </div>
   )
 }

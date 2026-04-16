@@ -43,5 +43,25 @@
 
   "idle.returning": "Terug naar start over {seconds}s...",
 
-  "common.back": "Terug"
+  "common.back": "Terug",
+
+  "printer.status.warmingUp": "Printer warmt op...",
+  "printer.status.printing": "Je strip wordt afgedrukt...",
+  "printer.status.verifying": "Bijna klaar...",
+  "printer.status.retrying": "Een moment, we proberen het opnieuw...",
+  "printer.error.title": "Afdruk niet voltooid",
+  "printer.error.paperOut": "De printer heeft meer papier nodig",
+  "printer.error.paperJam": "Er zit een papierstoring",
+  "printer.error.offline": "De printer reageert niet",
+  "printer.error.needsAttention": "De printer heeft aandacht nodig",
+  "printer.error.verificationTimeout": "De afdruk duurt langer dan verwacht",
+  "printer.error.stalledInSpooler": "De printer slaapt mogelijk — houd de aan/uit-knop ingedrukt om hem te wekken",
+  "printer.error.buttonRetry": "Opnieuw proberen",
+  "printer.error.buttonSkip": "Later bewaren",
+  "printer.error.buttonAdmin": "Beheer",
+  "home.printer.unavailable.halt": "Printer niet beschikbaar — vraag de gastheer",
+  "home.printer.unavailable.captureOnly": "Printer offline — je strip wordt bewaard voor later",
+  "review.button.saveOnly": "Bewaren",
+  "thankyou.title.saved": "Je strip is bewaard!",
+  "thankyou.subtitle.saved": "De gastheer drukt hem later voor je af."
 }

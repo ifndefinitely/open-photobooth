@@ -9,7 +9,8 @@ import type {
   PaperSize,
   PrintQuality,
   ColorMode,
-  PrintMargins
+  PrintMargins,
+  OfflineBehaviour
 } from '@/stores/printerSettingsStore'
 
 // ── Settings key → Store mapping ──
@@ -239,6 +240,60 @@ function buildMappings(): SettingsMapping[] {
       subscribe: (cb) =>
         printer.subscribe((s, prev) => {
           if (s.copies !== prev.copies) cb()
+        })
+    },
+    {
+      key: 'printer.preflightTimeout',
+      get: () => printer.getState().preflightTimeout,
+      set: (v) => printer.getState().setPreflightTimeout(v as number),
+      subscribe: (cb) =>
+        printer.subscribe((s, prev) => {
+          if (s.preflightTimeout !== prev.preflightTimeout) cb()
+        })
+    },
+    {
+      key: 'printer.verificationTimeout',
+      get: () => printer.getState().verificationTimeout,
+      set: (v) => printer.getState().setVerificationTimeout(v as number),
+      subscribe: (cb) =>
+        printer.subscribe((s, prev) => {
+          if (s.verificationTimeout !== prev.verificationTimeout) cb()
+        })
+    },
+    {
+      key: 'printer.verificationPollInterval',
+      get: () => printer.getState().verificationPollInterval,
+      set: (v) => printer.getState().setVerificationPollInterval(v as number),
+      subscribe: (cb) =>
+        printer.subscribe((s, prev) => {
+          if (s.verificationPollInterval !== prev.verificationPollInterval) cb()
+        })
+    },
+    {
+      key: 'printer.autoRetryOnce',
+      get: () => printer.getState().autoRetryOnce,
+      set: (v) => printer.getState().setAutoRetryOnce(v as boolean),
+      subscribe: (cb) =>
+        printer.subscribe((s, prev) => {
+          if (s.autoRetryOnce !== prev.autoRetryOnce) cb()
+        })
+    },
+    {
+      key: 'printer.offlineBehaviour',
+      get: () => printer.getState().offlineBehaviour,
+      set: (v) => printer.getState().setOfflineBehaviour(v as OfflineBehaviour),
+      subscribe: (cb) =>
+        printer.subscribe((s, prev) => {
+          if (s.offlineBehaviour !== prev.offlineBehaviour) cb()
+        })
+    },
+    {
+      key: 'printer.healthPollInterval',
+      get: () => printer.getState().healthPollInterval,
+      set: (v) => printer.getState().setHealthPollInterval(v as number),
+      subscribe: (cb) =>
+        printer.subscribe((s, prev) => {
+          if (s.healthPollInterval !== prev.healthPollInterval) cb()
         })
     },
 

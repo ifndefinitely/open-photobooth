@@ -8,6 +8,7 @@ import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
 import { useIdleTimeout } from '@/hooks/useIdleTimeout'
 import { useStripComposition } from '@/hooks/useStripComposition'
 import { useAutoSave } from '@/hooks/useAutoSave'
+import { useCaptureAvailability } from '@/hooks/useCaptureAvailability'
 import { useT } from '@/i18n'
 import ConfirmationDialog from '@/components/ConfirmationDialog/ConfirmationDialog'
 import IdleCountdown from '@/components/IdleCountdown/IdleCountdown'
@@ -16,7 +17,7 @@ import FilterSelector from '@/components/FilterSelector/FilterSelector'
 import type { FilterType } from '@/stores/stripStore'
 import styles from './ReviewScreen.module.css'
 
-type ConfirmAction = 'abort' | 'printerError' | null
+type ConfirmAction = 'abort' | 'redo' | 'print' | 'printerError' | null
 
 function ReviewScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
@@ -35,12 +36,19 @@ function ReviewScreen(): React.JSX.Element {
   const filterVintage = useStripSettingsStore((s) => s.filterVintage)
 
   const printerName = usePrinterSettingsStore((s) => s.printerName)
+  const { bannerMode } = useCaptureAvailability()
+  const setWasPrinted = useStripStore((s) => s.setWasPrinted)
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
   const [isCheckingPrinter, setIsCheckingPrinter] = useState(false)
   const [printerErrorDetail, setPrinterErrorDetail] = useState('')
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
   const t = useT()
+
+  const handleSavePress = useCallback(() => {
+    setWasPrinted(false)
+    navigateTo('thankyou')
+  }, [navigateTo, setWasPrinted])
 
   const handlePrintPress = useCallback(async () => {
     if (!printerName) {
@@ -112,12 +120,25 @@ function ReviewScreen(): React.JSX.Element {
       </div>
 
       <div className={styles.actions}>
-        <button
-          className={styles.buttonPrimary}
-          onClick={handlePrintPress}
-          disabled={isComposing || !!compositionError || isCheckingPrinter}
-        >
-          {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
+        {bannerMode === 'captureOnly' ? (
+          <button
+            className={styles.buttonPrimary}
+            onClick={handleSavePress}
+            disabled={isComposing || !!compositionError}
+          >
+            {t('review.button.saveOnly')}
+          </button>
+        ) : (
+          <button
+            className={styles.buttonPrimary}
+            onClick={handlePrintPress}
+            disabled={isComposing || !!compositionError || isCheckingPrinter}
+          >
+            {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
+          </button>
+        )}
+        <button className={styles.buttonSecondary} onClick={() => setConfirmAction('redo')}>
+          {t('review.redo')}
         </button>
         <button className={styles.buttonDanger} onClick={() => setConfirmAction('abort')}>
           {t('review.abort')}
@@ -136,6 +157,20 @@ function ReviewScreen(): React.JSX.Element {
           cancelLabel={t('review.confirmAbort.cancel')}
           variant="danger"
           onConfirm={() => navigateTo('home')}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction === 'print' && (
+        <ConfirmationDialog
+          title={t('print.confirm.title')}
+          message={t('print.confirm.message')}
+          confirmLabel={t('print.confirm.confirm')}
+          cancelLabel={t('print.confirm.cancel')}
+          onConfirm={() => {
+            setConfirmAction(null)
+            setWasPrinted(true)
+            navigateTo('print')
+          }}
           onCancel={() => setConfirmAction(null)}
         />
       )}

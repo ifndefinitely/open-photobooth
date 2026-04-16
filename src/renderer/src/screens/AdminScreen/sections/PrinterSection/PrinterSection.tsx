@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
-import type { PaperSize, PrintQuality, ColorMode } from '@/stores/printerSettingsStore'
+import type {
+  PaperSize,
+  PrintQuality,
+  ColorMode,
+  OfflineBehaviour
+} from '@/stores/printerSettingsStore'
+import { NumberStepper, Toggle, Dropdown } from '@/components/admin'
+import { usePrinterStatusStore } from '@/stores/printerStatusStore'
 import styles from './PrinterSection.module.css'
 
 // Matches the PrinterInfo shape from the preload API
@@ -24,6 +31,35 @@ function PrinterSection(): React.JSX.Element {
   const setColorMode = usePrinterSettingsStore((s) => s.setColorMode)
   const setMargins = usePrinterSettingsStore((s) => s.setMargins)
   const setCopies = usePrinterSettingsStore((s) => s.setCopies)
+
+  const preflightTimeout = usePrinterSettingsStore((s) => s.preflightTimeout)
+  const verificationTimeout = usePrinterSettingsStore((s) => s.verificationTimeout)
+  const verificationPollInterval = usePrinterSettingsStore((s) => s.verificationPollInterval)
+  const autoRetryOnce = usePrinterSettingsStore((s) => s.autoRetryOnce)
+  const offlineBehaviour = usePrinterSettingsStore((s) => s.offlineBehaviour)
+  const healthPollInterval = usePrinterSettingsStore((s) => s.healthPollInterval)
+
+  const setPreflightTimeout = usePrinterSettingsStore((s) => s.setPreflightTimeout)
+  const setVerificationTimeout = usePrinterSettingsStore((s) => s.setVerificationTimeout)
+  const setVerificationPollInterval = usePrinterSettingsStore((s) => s.setVerificationPollInterval)
+  const setAutoRetryOnce = usePrinterSettingsStore((s) => s.setAutoRetryOnce)
+  const setOfflineBehaviour = usePrinterSettingsStore((s) => s.setOfflineBehaviour)
+  const setHealthPollInterval = usePrinterSettingsStore((s) => s.setHealthPollInterval)
+
+  const liveStatus = usePrinterStatusStore((s) => s.status)
+  const setStatus = usePrinterStatusStore((s) => s.setStatus)
+  const [refreshingStatus, setRefreshingStatus] = useState(false)
+
+  const refreshStatus = useCallback(async () => {
+    if (!printerName) return
+    setRefreshingStatus(true)
+    try {
+      const fresh = await window.api.printer.getStatus(printerName)
+      setStatus(fresh)
+    } finally {
+      setRefreshingStatus(false)
+    }
+  }, [printerName, setStatus])
 
   const [printers, setPrinters] = useState<PrinterInfo[]>([])
   const [isLoadingPrinters, setIsLoadingPrinters] = useState(false)
@@ -265,6 +301,71 @@ function PrinterSection(): React.JSX.Element {
             min={1}
             max={5}
             onChange={(e) => setCopies(Number(e.target.value))}
+          />
+        </div>
+
+        {/* Reliability subgroup */}
+        <div className={styles.subgroup}>
+          <h3 className={styles.subgroupTitle}>Reliability</h3>
+
+          <div className={styles.liveStatusRow}>
+            <span className={styles.liveLabel}>Current status:</span>
+            <span
+              className={`${styles.liveBadge} ${liveStatus ? styles[`live_${liveStatus.state}`] : styles.live_unknown}`}
+            >
+              {liveStatus?.state ?? 'unknown'}
+            </span>
+            <span className={styles.liveDetail}>{liveStatus?.detail ?? '—'}</span>
+            <button
+              className={styles.refreshButton}
+              onClick={refreshStatus}
+              disabled={!printerName || refreshingStatus}
+            >
+              {refreshingStatus ? 'Checking...' : 'Refresh'}
+            </button>
+          </div>
+
+          <NumberStepper
+            label="Pre-flight timeout (seconds)"
+            value={preflightTimeout}
+            onChange={setPreflightTimeout}
+            min={5}
+            max={30}
+          />
+          <NumberStepper
+            label="Verification timeout (seconds)"
+            value={verificationTimeout}
+            onChange={setVerificationTimeout}
+            min={30}
+            max={180}
+          />
+          <NumberStepper
+            label="Verification poll interval (seconds)"
+            value={verificationPollInterval}
+            onChange={setVerificationPollInterval}
+            min={1}
+            max={10}
+          />
+          <Toggle
+            label="Auto-retry once on verified failure"
+            value={autoRetryOnce}
+            onChange={setAutoRetryOnce}
+          />
+          <Dropdown
+            label="Offline behaviour"
+            value={offlineBehaviour}
+            onChange={(v) => setOfflineBehaviour(v as OfflineBehaviour)}
+            options={[
+              { label: 'Halt captures (red banner)', value: 'halt' },
+              { label: 'Capture only (amber banner, save for later)', value: 'captureOnly' }
+            ]}
+          />
+          <NumberStepper
+            label="Health check interval (seconds)"
+            value={healthPollInterval}
+            onChange={setHealthPollInterval}
+            min={5}
+            max={60}
           />
         </div>
 

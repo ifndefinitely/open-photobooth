@@ -31,6 +31,12 @@ interface SettingsSchema {
     colorMode: string
     margins: { top: number; right: number; bottom: number; left: number }
     copies: number
+    preflightTimeout: number
+    verificationTimeout: number
+    verificationPollInterval: number
+    autoRetryOnce: boolean
+    offlineBehaviour: 'halt' | 'captureOnly'
+    healthPollInterval: number
   }
   session: {
     photoCount: number
@@ -95,7 +101,13 @@ const DEFAULTS: SettingsSchema = {
     quality: 'high',
     colorMode: 'color',
     margins: { top: 0, right: 0, bottom: 0, left: 0 },
-    copies: 1
+    copies: 1,
+    preflightTimeout: 10,
+    verificationTimeout: 90,
+    verificationPollInterval: 2,
+    autoRetryOnce: true,
+    offlineBehaviour: 'captureOnly',
+    healthPollInterval: 10
   },
   session: {
     photoCount: 4,

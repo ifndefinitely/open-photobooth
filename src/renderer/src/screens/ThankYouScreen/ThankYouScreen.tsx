@@ -8,13 +8,17 @@ import styles from './ThankYouScreen.module.css'
 function ThankYouScreen(): React.JSX.Element {
   const goHome = useNavigationStore((state) => state.goHome)
   const printSheetResult = useStripStore((s) => s.printSheetResult)
+  const wasPrinted = useStripStore((s) => s.wasPrinted)
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
   const t = useT()
 
+  const titleKey = wasPrinted ? 'thankyou.title' : 'thankyou.title.saved'
+  const subtitleKey = wasPrinted ? 'thankyou.subtitle' : 'thankyou.subtitle.saved'
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>{t('thankyou.title')}</h1>
-      <p className={styles.subtitle}>{t('thankyou.subtitle')}</p>
+      <h1 className={styles.title}>{t(titleKey)}</h1>
+      <p className={styles.subtitle}>{t(subtitleKey)}</p>
 
       {printSheetResult?.dataUrl && (
         <img

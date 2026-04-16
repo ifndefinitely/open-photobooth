@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain } from 'electron'
+import { BrowserWindow, dialog, ipcMain, app } from 'electron'
 import { getPrinters, checkPrinterAvailability, print } from './printerService'
 import type { PrintOptions } from './printerService'
 import * as settingsService from './settingsService'
@@ -10,6 +10,7 @@ import * as kioskService from './kioskService'
 import * as musicLibraryService from './musicLibraryService'
 import { MusicLibraryError } from './musicLibraryService'
 import type { ImportErrorReason } from './musicLibraryService'
+import * as statusService from './printerStatusService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -31,11 +32,34 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   })
 
   ipcMain.handle('printer:check-availability', async (_event, printerName: string) => {
-    return checkPrinterAvailability(mainWindow, printerName)
+    const preflightSeconds = settingsService.get('printer.preflightTimeout')
+    const timeoutSec =
+      typeof preflightSeconds === 'number' &&
+      Number.isFinite(preflightSeconds) &&
+      preflightSeconds > 0
+        ? preflightSeconds
+        : 10
+    return checkPrinterAvailability(mainWindow, printerName, {
+      preflightTimeoutMs: timeoutSec * 1000
+    })
   })
 
   ipcMain.handle('printer:print', async (_event, options: PrintOptions) => {
-    return print(options)
+    const verifyTimeout = settingsService.get('printer.verificationTimeout')
+    const verifyInterval = settingsService.get('printer.verificationPollInterval')
+    const timeoutSec =
+      typeof verifyTimeout === 'number' && Number.isFinite(verifyTimeout) && verifyTimeout > 0
+        ? verifyTimeout
+        : 90
+    const intervalSec =
+      typeof verifyInterval === 'number' && Number.isFinite(verifyInterval) && verifyInterval > 0
+        ? verifyInterval
+        : 2
+    return print({
+      ...options,
+      verificationTimeoutMs: timeoutSec * 1000,
+      verificationPollIntervalMs: intervalSec * 1000
+    })
   })
 
   // ── Settings ──
@@ -206,4 +230,56 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     const list = (settingsService.get('audio.customMusicTracks') as string[] | undefined) ?? []
     return musicLibraryService.listTracks(list)
   })
+
+  // ── Printer Status ──
+
+  ipcMain.handle('printer:get-status', async (_event, printerName: string) => {
+    return statusService.getStatus(printerName)
+  })
+
+  // ── Log buffer ──
+
+  ipcMain.handle(
+    'logging:get-recent',
+    (_event, options: { limit: number; source?: string; level?: LogLevel }) => {
+      return loggingService.getRecent(options)
+    }
+  )
+
+  // ── Dev-only mock status override (NODE_ENV === 'development') ──
+  if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
+    let mockStatus: import('./printerStatusService').PrinterStatus | null = null
+
+    ipcMain.handle(
+      '__dev:set-mock-printer-status',
+      (
+        _event,
+        override: null | {
+          state: 'ready' | 'busy' | 'warmingUp' | 'offline' | 'error'
+          rawStatusCode: number
+          detail: string
+        }
+      ) => {
+        if (override === null) {
+          mockStatus = null
+          return
+        }
+        mockStatus = {
+          name: 'MOCK',
+          state: override.state,
+          rawStatusCode: override.rawStatusCode,
+          jobCount: 0,
+          detail: override.detail,
+          queriedAt: Date.now()
+        }
+      }
+    )
+
+    // Replace the real get-status handler when a mock is set
+    ipcMain.removeHandler('printer:get-status')
+    ipcMain.handle('printer:get-status', async (_event, printerName: string) => {
+      if (mockStatus) return { ...mockStatus, name: printerName }
+      return statusService.getStatus(printerName)
+    })
+  }
 }

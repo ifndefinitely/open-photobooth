@@ -123,6 +123,7 @@ app.whenReady().then(async () => {
 
   const mainWindow = createWindow()
   registerIpcHandlers(mainWindow)
+  loggingService.attachRendererMirror(mainWindow.webContents)
   kioskService.init(mainWindow)
 
   app.on('activate', () => {

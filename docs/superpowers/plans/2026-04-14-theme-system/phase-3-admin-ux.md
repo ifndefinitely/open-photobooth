@@ -1151,61 +1151,61 @@ Wait for confirmation.
 
 This is the Definition of Done walkthrough. Every bullet in spec §11 must be checked off.
 
-- [ ] **Step 1: Start the dev server**
+- [x] **Step 1: Start the dev server**
 
 Run: `npm run dev`
 
 Leave it running. Open DevTools.
 
-- [ ] **Step 2: Walk the Definition of Done**
+- [x] **Step 2: Walk the Definition of Done**
 
 Go through each bullet from spec §11 and tick it off only after verifying on-screen.
 
-- [ ] A new admin setting `appearance.theme` exists with values `drugstore | artDeco | wedding` and default `drugstore`.
+- [x] A new admin setting `appearance.theme` exists with values `drugstore | artDeco | wedding` and default `drugstore`.
 
 Verify: `await window.api.settings.get('appearance.theme')` returns `'drugstore'` on a fresh config. The ThemePicker in Appearance shows three tiles matching those three ids (the tile's displayName is the prettified version).
 
-- [ ] Setting persists via settingsService and survives app restart.
+- [x] Setting persists via settingsService and survives app restart.
 
 Verify: pick Art Deco. Kill the dev server with Ctrl+C. Run `npm run dev` again. The tile for Art Deco is still selected when you re-open Appearance, and `<html data-theme="artDeco">` is set immediately on first render after hydration.
 
-- [ ] The Appearance section has a theme picker with three thumbnails and a live preview pane.
+- [x] The Appearance section has a theme picker with three thumbnails and a live preview pane.
 
 Verify visually. All three tiles render in their own palettes. The preview pane below shows the mock home screen in the currently selected theme. Taps on any tile immediately update both the selection ring and the preview pane.
 
-- [ ] Clicking a thumbnail updates the preview instantly and persists the choice.
+- [x] Clicking a thumbnail updates the preview instantly and persists the choice.
 
 Verify: click each tile in turn. The preview pane must update on the same frame (no 200ms JS delay, no flash). Between clicks, check DevTools → Elements → `<html>` and confirm `data-theme` attribute is in sync.
 
-- [ ] After admin exits, all user-facing screens reflect the selected theme.
+- [x] After admin exits, all user-facing screens reflect the selected theme.
 
 Verify: select Elegant Wedding. Close admin (swipe/escape). You should land on HomeScreen in the wedding theme — ivory background, Playfair heading, Lato body, pill button. Trigger a session (real or stress test) — Session, Review, Print, ThankYou all themed. If the strip preview on Review shows the strip in its previous colors, that's expected (it reflects stripSettings, not the theme — the Apply button is the bridge).
 
-- [ ] All three themes have been verified on every user-facing screen with no missing colors, invisible text, or font fallback.
+- [x] All three themes have been verified on every user-facing screen with no missing colors, invisible text, or font fallback.
 
 This was covered by the Phase 2 gate (Task 2.7). Spot-check it again now: while themed admin is open, click each tile, exit admin, walk the three screens you didn't touch during Phase 2 (anything you skipped). If a new regression appears, fix it the same way.
 
-- [ ] The "Apply theme to strip" button copies theme colors into strip settings and shows feedback.
+- [x] The "Apply theme to strip" button copies theme colors into strip settings and shows feedback.
 
 Verify: switch to Drugstore, click Apply, see "Applied ✓" for 1.5s, see strip preview canvas update to warm-dark background with cream border. Repeat for Art Deco and Wedding.
 
-- [ ] The Inter-font bug in `global.css` is fixed.
+- [x] The Inter-font bug in `global.css` is fixed.
 
 Verify: set `data-theme` to an unknown value (e.g., `setTheme('doesNotExist')` — the hook should fall back to drugstore, which uses Roboto Slab as body, not Inter). Clear the attribute: `document.documentElement.removeAttribute('data-theme')`. With no attribute, `:root` defaults in `tokens.css` apply, so `--font-body: 'Inter', sans-serif`. Verify in DevTools → Computed that `body` has `font-family: "Inter", sans-serif` resolved. Task 1.3 fixed this originally, and this step just confirms no later task undid it.
 
-- [ ] No user-facing CSS module file contains a hardcoded color that should be a token.
+- [x] No user-facing CSS module file contains a hardcoded color that should be a token.
 
 Verify: run `./scripts/check-hardcoded-colors.sh`. Expected: `✓ No hardcoded hex colors in themed modules.` — exit code 0. If it fails, Phase 1 cleanup missed something; fix it with the same pattern as Tasks 1.11–1.22.
 
-- [ ] Font files bundled with LICENSES.md documenting SIL OFL terms.
+- [x] Font files bundled with LICENSES.md documenting SIL OFL terms.
 
 Verify: `ls src/renderer/src/assets/fonts/` shows all 12 `.ttf` files plus `LICENSES.md`. The `LICENSES.md` lists every family with its copyright line and upstream link (Task 2.1 Step 3).
 
-- [ ] **Step 3: Stop the dev server**
+- [x] **Step 3: Stop the dev server**
 
 Only after all bullets above are ticked off.
 
-- [ ] **Step 4: Final commit (usually empty)**
+- [x] **Step 4: Final commit (usually empty)**
 
 Like the Phase 2 gate, this task usually produces no file changes. If the walkthrough surfaced a bug, fix it as a small separate commit, then tell the user:
 

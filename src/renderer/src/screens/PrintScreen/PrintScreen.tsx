@@ -53,6 +53,7 @@ function PrintScreen(): React.JSX.Element {
             <span className={styles.dot} />
           </div>
         </div>
+        <p className={styles.helpHint}>{t('print.helpHint')}</p>
         {showLongWait && <p className={styles.secondaryMessage}>{t('print.stillPrinting')}</p>}
       </div>
     )

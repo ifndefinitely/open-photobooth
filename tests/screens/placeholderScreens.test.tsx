@@ -36,45 +36,17 @@ describe('ReviewScreen', () => {
     expect(screen.getByText('Your Photos')).toBeInTheDocument()
   })
 
-  it('shows print confirmation after printer check', async () => {
+  it('navigates directly to print after printer check succeeds', async () => {
     render(<ReviewScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Print' }))
     await waitFor(() => {
-      expect(screen.getByText('Print Your Photos?')).toBeInTheDocument()
+      expect(useNavigationStore.getState().currentScreen).toBe('print')
     })
   })
 
-  it('navigates to print after confirming', async () => {
+  it('does not render a Redo button', () => {
     render(<ReviewScreen />)
-    fireEvent.click(screen.getByRole('button', { name: 'Print' }))
-    await waitFor(() => {
-      expect(screen.getByText('Print Your Photos?')).toBeInTheDocument()
-    })
-    // There are two "Print" buttons — the action bar one and the dialog confirm one
-    const printButtons = screen.getAllByRole('button', { name: 'Print' })
-    fireEvent.click(printButtons[printButtons.length - 1])
-    expect(useNavigationStore.getState().currentScreen).toBe('print')
-  })
-
-  it('shows confirmation dialog on redo', () => {
-    render(<ReviewScreen />)
-    fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
-    expect(screen.getByText('Redo Photos?')).toBeInTheDocument()
-  })
-
-  it('navigates to session after confirming redo', () => {
-    render(<ReviewScreen />)
-    fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
-    // The confirm button label is "Yes, Redo" (from i18n)
-    fireEvent.click(screen.getByRole('button', { name: 'Yes, Redo' }))
-    expect(useNavigationStore.getState().currentScreen).toBe('session')
-  })
-
-  it('dismisses redo dialog on cancel', () => {
-    render(<ReviewScreen />)
-    fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
-    fireEvent.click(screen.getByRole('button', { name: 'No, Keep Photos' }))
-    expect(screen.queryByText('Redo Photos?')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Redo' })).not.toBeInTheDocument()
   })
 
   it('shows confirmation dialog on start over', () => {

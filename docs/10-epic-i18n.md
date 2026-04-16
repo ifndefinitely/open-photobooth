@@ -50,26 +50,16 @@ Implement internationalization support so that all user-facing text can be displ
 
   "review.title": "Your Photos",
   "review.print": "Print",
-  "review.redo": "Redo",
   "review.abort": "Start Over",
-
-  "review.confirmRedo.title": "Redo Photos?",
-  "review.confirmRedo.message": "This will discard your current photos and take new ones. Are you sure?",
-  "review.confirmRedo.confirm": "Yes, Redo",
-  "review.confirmRedo.cancel": "No, Keep Photos",
 
   "review.confirmAbort.title": "Start Over?",
   "review.confirmAbort.message": "This will discard your photos and return to the home screen. Are you sure?",
   "review.confirmAbort.confirm": "Yes, Start Over",
   "review.confirmAbort.cancel": "No, Keep Photos",
 
-  "print.confirm.title": "Print Your Photos?",
-  "print.confirm.message": "Your photo strip will be printed.",
-  "print.confirm.confirm": "Print",
-  "print.confirm.cancel": "Cancel",
-
   "print.printing": "Printing your photos...",
   "print.stillPrinting": "Still printing, please wait...",
+  "print.helpHint": "Printer not starting? Ask the store owner for help.",
 
   "thankyou.title": "Enjoy Your Photos!",
   "thankyou.subtitle": "Thank you for visiting our photobooth!",
@@ -121,26 +111,16 @@ Implement internationalization support so that all user-facing text can be displ
 
   "review.title": "Jouw Foto's",
   "review.print": "Afdrukken",
-  "review.redo": "Opnieuw",
   "review.abort": "Opnieuw Beginnen",
-
-  "review.confirmRedo.title": "Foto's opnieuw maken?",
-  "review.confirmRedo.message": "Je huidige foto's worden verwijderd en er worden nieuwe gemaakt. Weet je het zeker?",
-  "review.confirmRedo.confirm": "Ja, opnieuw",
-  "review.confirmRedo.cancel": "Nee, bewaar foto's",
 
   "review.confirmAbort.title": "Opnieuw beginnen?",
   "review.confirmAbort.message": "Je foto's worden verwijderd en je keert terug naar het startscherm. Weet je het zeker?",
   "review.confirmAbort.confirm": "Ja, opnieuw beginnen",
   "review.confirmAbort.cancel": "Nee, bewaar foto's",
 
-  "print.confirm.title": "Foto's afdrukken?",
-  "print.confirm.message": "Je fotostrip wordt afgedrukt.",
-  "print.confirm.confirm": "Afdrukken",
-  "print.confirm.cancel": "Annuleren",
-
   "print.printing": "Bezig met afdrukken...",
   "print.stillPrinting": "Nog even geduld, we zijn nog aan het afdrukken...",
+  "print.helpHint": "Printer start niet? Vraag de eigenaar om hulp.",
 
   "thankyou.title": "Geniet van je foto's!",
   "thankyou.subtitle": "Bedankt voor je bezoek aan onze photobooth!",

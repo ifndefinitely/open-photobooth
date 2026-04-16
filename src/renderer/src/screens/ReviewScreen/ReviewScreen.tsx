@@ -16,7 +16,7 @@ import FilterSelector from '@/components/FilterSelector/FilterSelector'
 import type { FilterType } from '@/stores/stripStore'
 import styles from './ReviewScreen.module.css'
 
-type ConfirmAction = 'redo' | 'abort' | 'print' | 'printerError' | null
+type ConfirmAction = 'abort' | 'printerError' | null
 
 function ReviewScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
@@ -55,7 +55,7 @@ function ReviewScreen(): React.JSX.Element {
     try {
       const result = await window.api.printer.checkAvailability(printerName)
       if (result.available) {
-        setConfirmAction('print')
+        navigateTo('print')
       } else {
         const detail = `Printer "${printerName}" is not available (status: ${result.status}).`
         logger.error('Printer', detail)
@@ -70,7 +70,7 @@ function ReviewScreen(): React.JSX.Element {
     } finally {
       setIsCheckingPrinter(false)
     }
-  }, [printerName])
+  }, [printerName, navigateTo])
 
   // Orchestrate the composition pipeline
   useStripComposition()
@@ -119,24 +119,15 @@ function ReviewScreen(): React.JSX.Element {
         >
           {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
         </button>
-        <button className={styles.buttonSecondary} onClick={() => setConfirmAction('redo')}>
-          {t('review.redo')}
-        </button>
         <button className={styles.buttonDanger} onClick={() => setConfirmAction('abort')}>
           {t('review.abort')}
         </button>
       </div>
 
-      {confirmAction === 'redo' && (
-        <ConfirmationDialog
-          title={t('review.confirmRedo.title')}
-          message={t('review.confirmRedo.message')}
-          confirmLabel={t('review.confirmRedo.confirm')}
-          cancelLabel={t('review.confirmRedo.cancel')}
-          onConfirm={() => navigateTo('session')}
-          onCancel={() => setConfirmAction(null)}
-        />
+      {remainingSeconds !== null && (
+        <IdleCountdown remainingSeconds={remainingSeconds} variant="inline" />
       )}
+
       {confirmAction === 'abort' && (
         <ConfirmationDialog
           title={t('review.confirmAbort.title')}
@@ -145,19 +136,6 @@ function ReviewScreen(): React.JSX.Element {
           cancelLabel={t('review.confirmAbort.cancel')}
           variant="danger"
           onConfirm={() => navigateTo('home')}
-          onCancel={() => setConfirmAction(null)}
-        />
-      )}
-      {confirmAction === 'print' && (
-        <ConfirmationDialog
-          title={t('print.confirm.title')}
-          message={t('print.confirm.message')}
-          confirmLabel={t('print.confirm.confirm')}
-          cancelLabel={t('print.confirm.cancel')}
-          onConfirm={() => {
-            setConfirmAction(null)
-            navigateTo('print')
-          }}
           onCancel={() => setConfirmAction(null)}
         />
       )}
@@ -175,7 +153,6 @@ function ReviewScreen(): React.JSX.Element {
           onCancel={() => setConfirmAction(null)}
         />
       )}
-      {remainingSeconds !== null && <IdleCountdown remainingSeconds={remainingSeconds} />}
     </div>
   )
 }

@@ -9,26 +9,16 @@
   "review.title": "Jouw Foto's",
   "review.checkingPrinter": "Printer controleren...",
   "review.print": "Afdrukken",
-  "review.redo": "Opnieuw",
   "review.abort": "Opnieuw Beginnen",
-
-  "review.confirmRedo.title": "Foto's opnieuw maken?",
-  "review.confirmRedo.message": "Je huidige foto's worden verwijderd en er worden nieuwe gemaakt. Weet je het zeker?",
-  "review.confirmRedo.confirm": "Ja, opnieuw",
-  "review.confirmRedo.cancel": "Nee, bewaar foto's",
 
   "review.confirmAbort.title": "Opnieuw beginnen?",
   "review.confirmAbort.message": "Je foto's worden verwijderd en je keert terug naar het startscherm. Weet je het zeker?",
   "review.confirmAbort.confirm": "Ja, opnieuw beginnen",
   "review.confirmAbort.cancel": "Nee, bewaar foto's",
 
-  "print.confirm.title": "Foto's afdrukken?",
-  "print.confirm.message": "Je fotostrip wordt afgedrukt.",
-  "print.confirm.confirm": "Afdrukken",
-  "print.confirm.cancel": "Annuleren",
-
   "print.printing": "Bezig met afdrukken...",
   "print.stillPrinting": "Nog even geduld, we zijn nog aan het afdrukken...",
+  "print.helpHint": "Printer start niet? Vraag de eigenaar om hulp.",
   "print.success": "Afdruk verzonden!",
 
   "thankyou.title": "Geniet van je foto's!",

@@ -1,3 +1,9 @@
+/*
+ * FlashOverlay renders a pure-white fullscreen flash over the camera
+ * feed during capture. #ffffff is intentional — this is a physical
+ * flash effect, not a theme color. Whitelisted in
+ * scripts/check-hardcoded-colors.sh.
+ */
 .flash {
   position: absolute;
   inset: 0;

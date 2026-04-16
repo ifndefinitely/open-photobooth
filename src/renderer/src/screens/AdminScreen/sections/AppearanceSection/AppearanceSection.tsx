@@ -1,5 +1,7 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { useStripSettingsStore } from '@/stores/stripSettingsStore'
+import { useAppSettingsStore } from '@/stores/appSettingsStore'
+import { isThemeId, getTheme, type ThemeId } from '@/themes'
 import {
   SectionHeader,
   FilePicker,
@@ -9,6 +11,8 @@ import {
   ColorPicker,
   Slider
 } from '@/components/admin'
+import ThemePicker from './ThemePicker'
+import ThemePreviewPane from './ThemePreviewPane'
 import styles from './AppearanceSection.module.css'
 
 const DATE_FORMAT_OPTIONS = [
@@ -45,9 +49,29 @@ function AppearanceSection(): React.JSX.Element {
   const setBorderWidth = useStripSettingsStore((s) => s.setBorderWidth)
   const setBackgroundColor = useStripSettingsStore((s) => s.setBackgroundColor)
 
+  const themeValue = useAppSettingsStore((s) => s.theme)
+  const themeId: ThemeId = isThemeId(themeValue) ? themeValue : 'drugstore'
+
+  const [appliedFeedback, setAppliedFeedback] = useState(false)
+
+  const handleApplyThemeToStrip = useCallback(() => {
+    const theme = getTheme(themeId)
+    if (!theme) return
+    setBackgroundColor(theme.palette.bg)
+    setBorderColor(theme.palette.border)
+    setAppliedFeedback(true)
+    setTimeout(() => setAppliedFeedback(false), 1500)
+  }, [themeId, setBackgroundColor, setBorderColor])
+
   return (
     <div className={styles.section}>
       <h2 className={styles.title}>Appearance</h2>
+
+      <div className={styles.themeBlock}>
+        <SectionHeader title="Theme" />
+        <ThemePicker />
+        <ThemePreviewPane themeId={themeId} />
+      </div>
 
       <div className={styles.layout}>
         <div className={styles.controls}>
@@ -122,6 +146,14 @@ function AppearanceSection(): React.JSX.Element {
             value={backgroundColor}
             onChange={setBackgroundColor}
           />
+
+          <button
+            type="button"
+            className={styles.applyThemeButton}
+            onClick={handleApplyThemeToStrip}
+          >
+            {appliedFeedback ? 'Applied ✓' : 'Apply current theme to strip'}
+          </button>
         </div>
 
         <div className={styles.previewPanel}>

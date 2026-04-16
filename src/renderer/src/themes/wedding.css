@@ -1,0 +1,40 @@
+/*
+ * Elegant Wedding theme — refined, timeless, the ONLY light theme.
+ * Warm ivory background with deep-charcoal accent, soft shadows.
+ * Typography: Playfair Display display + Lato body.
+ * Shape: pill buttons (999px), rounded cards, soft drop shadows.
+ *
+ * Because this is the only light theme, any hardcoded #fff text in
+ * themed CSS modules becomes invisible here — Phase 1 cleanup removes
+ * those, and Task 2.7 walks every screen to verify no regressions.
+ *
+ * Values sourced from docs/superpowers/specs/2026-04-14-theme-system-design.md §5.3.
+ */
+:root[data-theme='wedding'] {
+  /* ── Colors ──────────────────────────────────────────── */
+  --color-bg: #f4efe6;
+  --color-surface: #ffffff;
+  --color-surface-light: #faf7f0;
+  --color-text: #2a2622;
+  --color-text-muted: #6e6760;
+  --color-accent: #3a3532;
+  --color-accent-active: #1a1614;
+  --color-accent-contrast: #ffffff;
+  --color-border: #d4c9b8;
+  --color-accent-glow: rgba(58, 53, 50, 0.2);
+
+  /* ── Typography ──────────────────────────────────────── */
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Lato', sans-serif;
+  --font-weight-display: 700;
+  --letter-spacing-display: 0;
+
+  /* ── Shape ───────────────────────────────────────────── */
+  --button-radius: 999px;
+  --button-border-width: 0;
+  --button-border-style: none;
+  --button-shadow: 0 4px 12px rgba(42, 38, 34, 0.15);
+  --card-radius: 12px;
+  --card-shadow: 0 2px 8px rgba(42, 38, 34, 0.08);
+  --input-radius: 8px;
+}

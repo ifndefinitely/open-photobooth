@@ -9,9 +9,11 @@
 }
 
 .text {
-  font-size: clamp(60px, 12vw, 100px);
+  font-family: var(--font-display);
   font-weight: 800;
-  color: #ffffff;
+  letter-spacing: var(--letter-spacing-display);
+  font-size: clamp(60px, 12vw, 100px);
+  color: var(--color-text);
   text-shadow:
     0 0 40px rgba(0, 0, 0, 0.6),
     0 4px 8px rgba(0, 0, 0, 0.4);

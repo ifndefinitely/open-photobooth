@@ -5,6 +5,7 @@ import { join } from 'path'
 
 interface SettingsSchema {
   appearance: {
+    theme: string
     logoPath: string
     eventName: string
     dateStampEnabled: boolean
@@ -69,6 +70,7 @@ interface SettingsSchema {
 
 const DEFAULTS: SettingsSchema = {
   appearance: {
+    theme: 'drugstore',
     logoPath: '',
     eventName: '',
     dateStampEnabled: true,

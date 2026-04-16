@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 
 interface AppSettingsState {
+  // Appearance (theme only — strip-branding fields live in stripSettingsStore)
+  theme: string // "drugstore" | "artDeco" | "wedding"
+
   // PIN
   pinCode: string
 
@@ -24,6 +27,7 @@ interface AppSettingsState {
   audioShutterSound: boolean
 
   // Actions
+  setTheme: (theme: string) => void
   setPinCode: (code: string) => void
   setKioskAutoStart: (enabled: boolean) => void
   setKioskPreventSleep: (enabled: boolean) => void
@@ -39,6 +43,7 @@ interface AppSettingsState {
 }
 
 export const useAppSettingsStore = create<AppSettingsState>((set) => ({
+  theme: 'drugstore',
   pinCode: '0000',
   kioskAutoStart: false,
   kioskPreventSleep: true,
@@ -52,6 +57,7 @@ export const useAppSettingsStore = create<AppSettingsState>((set) => ({
   audioCountdownBeep: true,
   audioShutterSound: true,
 
+  setTheme: (theme) => set({ theme }),
   setPinCode: (code) => set({ pinCode: code }),
   setKioskAutoStart: (enabled) => set({ kioskAutoStart: enabled }),
   setKioskPreventSleep: (enabled) => set({ kioskPreventSleep: enabled }),

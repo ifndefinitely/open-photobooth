@@ -1,19 +1,69 @@
 :root {
-  --color-bg: #000000;
-  --color-text: #ffffff;
-  --color-accent: #4a90d9;
-  --color-accent-active: #3a7bc8;
-  --color-surface: #1a1a1a;
-  --color-surface-light: #2a2a2a;
-  --color-error: #e74c3c;
-  --color-success: #2ecc71;
-
+  /* ── Non-themed infrastructure ───────────────────────────── */
+  /* Touch targets */
   --touch-target-min: 48px;
   --touch-target-dialog: 60px;
   --touch-target-primary: 80px;
   --touch-target-admin: 44px;
-  --button-radius: 12px;
 
+  /* Z-index layers */
   --z-index-modal: 1000;
   --z-index-dialog: 1100;
+
+  /* Semantic status colors (constant across themes) */
+  --color-error: #e74c3c;
+  --color-success: #2ecc71;
+  --color-warning: #f0ad4e;
+
+  /* ── Admin UI palette (fixed — does NOT theme) ──────────── */
+  /* Admin surfaces & layout */
+  --admin-bg: #f5f5f5;
+  --admin-surface: #ffffff;
+  --admin-surface-hover: #f0f0f0;
+  --admin-border: #dddddd;
+  --admin-border-light: #e0e0e0;
+  --admin-border-input: #cccccc;
+
+  /* Admin text */
+  --admin-text: #222222;
+  --admin-text-strong: #333333;
+  --admin-text-muted: #555555;
+  --admin-text-hint: #888888;
+  --admin-text-disabled: #bbbbbb;
+  --admin-text-on-accent: #ffffff;
+
+  /* Admin buttons */
+  --admin-button-bg: #f5f5f5;
+  --admin-button-hover-bg: #e8e8e8;
+  --admin-button-active-bg: #dddddd;
+  --admin-button-radius: 12px;
+  --admin-input-radius: 6px;
+
+  /* Admin accent */
+  --admin-accent: #4a90d9;
+  --admin-accent-active: #3a7bc8;
+  --admin-accent-bg-subtle: #eef4fb;
+
+  /* Admin feedback */
+  --admin-danger: #d32f2f;
+  --admin-danger-strong: #ef5350;
+  --admin-danger-hover: #e53935;
+  --admin-danger-bg: #ffebee;
+  --admin-danger-text: #c62828;
+  --admin-danger-tint: rgba(211, 47, 47, 0.05);
+
+  --admin-success-bg: #e8f5e9;
+  --admin-success-text: #2e7d32;
+  --admin-success-border: #c8e6c9;
+
+  --admin-info-text: #1565c0;
+
+  --admin-warning-bg: #fff8e1;
+  --admin-warning-border: #ffcc02;
+  --admin-warning-text: #795548;
+
+  /* Admin shadows */
+  --admin-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --admin-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --admin-shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.25);
 }

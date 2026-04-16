@@ -1,0 +1,40 @@
+/*
+ * Theme token contract.
+ *
+ * :root defines the default themed token values — used when no
+ * data-theme attribute is set. Per-theme overrides live in
+ * drugstore.css, artDeco.css, wedding.css and use
+ * :root[data-theme="X"] selectors (specificity 0,1,1) to beat
+ * the bare :root default regardless of @import order.
+ *
+ * Non-themed tokens (touch targets, z-indices, error/success,
+ * admin palette) live in ../styles/variables.css.
+ */
+:root {
+  /* ── Color tokens ─────────────────────────────────────── */
+  --color-bg: #000000;
+  --color-surface: #1a1a1a;
+  --color-surface-light: #2a2a2a;
+  --color-text: #ffffff;
+  --color-text-muted: #aaaaaa;
+  --color-accent: #4a90d9;
+  --color-accent-active: #3a7bc8;
+  --color-accent-contrast: #ffffff;
+  --color-accent-glow: rgba(74, 144, 217, 0.25);
+  --color-border: #ffffff;
+
+  /* ── Typography tokens ────────────────────────────────── */
+  --font-display: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-weight-display: 700;
+  --letter-spacing-display: 0;
+
+  /* ── Shape tokens ─────────────────────────────────────── */
+  --button-radius: 12px;
+  --button-border-width: 0;
+  --button-border-style: none;
+  --button-shadow: none;
+  --card-radius: 12px;
+  --card-shadow: none;
+  --input-radius: 6px;
+}

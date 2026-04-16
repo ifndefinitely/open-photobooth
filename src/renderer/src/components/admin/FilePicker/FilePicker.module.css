@@ -12,7 +12,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .row {
@@ -26,26 +26,26 @@
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #333;
-  background: #e8e8e8;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  color: var(--admin-text-strong);
+  background: var(--admin-button-hover-bg);
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
   transition: background-color 0.15s ease;
 }
 
 .browseButton:hover {
-  background: #ddd;
+  background: var(--admin-button-active-bg);
 }
 
 .browseButton:active {
-  background: #ccc;
+  background: var(--admin-border-input);
 }
 
 .filename {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--admin-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -55,22 +55,22 @@
 .removeButton {
   padding: 6px 12px;
   font-size: 0.8rem;
-  color: #d32f2f;
+  color: var(--admin-danger);
   background: transparent;
-  border: 1px solid #d32f2f;
-  border-radius: 6px;
+  border: 1px solid var(--admin-danger);
+  border-radius: var(--admin-input-radius);
   cursor: pointer;
   min-height: var(--touch-target-min);
   transition: background-color 0.15s ease;
 }
 
 .removeButton:hover {
-  background: rgba(211, 47, 47, 0.05);
+  background: var(--admin-danger-tint);
 }
 
 .description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   margin: 0;
   line-height: 1.3;
 }

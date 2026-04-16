@@ -32,6 +32,15 @@ function buildMappings(): SettingsMapping[] {
   return [
     // ── Appearance ──
     {
+      key: 'appearance.theme',
+      get: () => app.getState().theme,
+      set: (v) => app.getState().setTheme(v as string),
+      subscribe: (cb) =>
+        app.subscribe((s, prev) => {
+          if (s.theme !== prev.theme) cb()
+        })
+    },
+    {
       key: 'appearance.logoPath',
       get: () => strip.getState().logoPath,
       set: (v) => strip.getState().setLogoPath(v as string),

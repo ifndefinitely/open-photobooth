@@ -1,0 +1,98 @@
+/*
+ * ThemePicker styles.
+ *
+ * The outer button + label are admin UI — they reference --admin-* tokens.
+ * The .tilePreview div is inside a data-theme scope and references themed
+ * tokens (--color-*, --font-*, shape tokens).
+ */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tileRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 4px;
+  border: 2px solid var(--admin-border);
+  border-radius: var(--admin-button-radius);
+  background: var(--admin-surface);
+  cursor: pointer;
+  min-width: 140px;
+  min-height: var(--touch-target-admin);
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.tile:hover {
+  border-color: var(--admin-accent);
+}
+
+.tile:active {
+  transform: scale(0.98);
+}
+
+.tileSelected {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px var(--admin-accent-bg-subtle);
+}
+
+.tilePreview {
+  /* Themed subtree — re-scoped by data-theme on this element. */
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-radius: var(--admin-input-radius);
+  padding: 16px 12px;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tileStage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.tileHeading {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--letter-spacing-display);
+  font-size: 32px;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.tileChip {
+  width: 60px;
+  height: 12px;
+  background: var(--color-accent);
+  border-radius: var(--button-radius);
+  border-width: var(--button-border-width);
+  border-style: var(--button-border-style);
+  border-color: var(--color-border);
+  box-shadow: var(--button-shadow);
+}
+
+.tileLabel {
+  /* Back in admin-land — neutral. */
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-strong);
+  text-align: center;
+  padding: 4px 0;
+}

@@ -1,0 +1,36 @@
+/*
+ * Art Deco theme — 1920s Gatsby glamour.
+ * Rich black background with antique gold accent, ivory text.
+ * Typography: Limelight display + Jost body, wide deco tracking.
+ * Shape: sharp rectangles, flat (no shadows), thin gold borders.
+ *
+ * Values sourced from docs/superpowers/specs/2026-04-14-theme-system-design.md §5.2.
+ */
+:root[data-theme='artDeco'] {
+  /* ── Colors ──────────────────────────────────────────── */
+  --color-bg: #0a0908;
+  --color-surface: #141210;
+  --color-surface-light: #1f1b15;
+  --color-text: #f6f0e4;
+  --color-text-muted: #9b8c6e;
+  --color-accent: #c9a646;
+  --color-accent-active: #a68734;
+  --color-accent-contrast: #0a0908;
+  --color-border: #c9a646;
+  --color-accent-glow: rgba(201, 166, 70, 0.3);
+
+  /* ── Typography ──────────────────────────────────────── */
+  --font-display: 'Limelight', serif;
+  --font-body: 'Jost', sans-serif;
+  --font-weight-display: 400;
+  --letter-spacing-display: 0.15em;
+
+  /* ── Shape ───────────────────────────────────────────── */
+  --button-radius: 0;
+  --button-border-width: 2px;
+  --button-border-style: solid;
+  --button-shadow: none;
+  --card-radius: 0;
+  --card-shadow: none;
+  --input-radius: 0;
+}

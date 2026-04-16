@@ -4,6 +4,7 @@
   height: 100%;
   width: 100%;
   position: relative;
+  background: var(--color-bg);
 }
 
 .preview {
@@ -22,12 +23,15 @@
   min-height: 80px;
   min-width: 200px;
   padding: 16px 48px;
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--letter-spacing-display);
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffffff;
+  color: var(--color-accent-contrast);
   background-color: var(--color-accent);
-  border: none;
+  border: var(--button-border-width) var(--button-border-style) var(--color-border);
   border-radius: var(--button-radius);
+  box-shadow: var(--button-shadow);
   cursor: pointer;
   transition:
     transform 0.1s ease,

@@ -12,28 +12,28 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--admin-text-muted);
 }
 
 .select {
   padding: 8px 12px;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
+  border: 1px solid var(--admin-border-input);
+  border-radius: var(--admin-input-radius);
+  background: var(--admin-surface);
+  color: var(--admin-text-strong);
   cursor: pointer;
   min-height: var(--touch-target-min);
 }
 
 .select:focus {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--admin-accent);
   outline-offset: -1px;
 }
 
 .description {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--admin-text-hint);
   margin: 0;
   line-height: 1.3;
 }

@@ -101,3 +101,24 @@
   background: var(--color-surface-light);
   color: var(--color-text);
 }
+
+.buttonPrimary:disabled,
+.buttonSecondary:disabled,
+.buttonTertiary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resetSuccess {
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--color-success);
+  margin: 0 0 16px;
+}
+
+.resetFailed {
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--color-error, var(--color-warning));
+  margin: 0 0 16px;
+}

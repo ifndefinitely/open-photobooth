@@ -43,11 +43,18 @@ export interface PrinterStatus {
   queriedAt: number
 }
 
+export interface ResetResult {
+  success: boolean
+  printerStatus?: string
+  error?: string
+}
+
 export interface PrinterAPI {
   getPrinters: () => Promise<PrinterInfo[]>
   checkAvailability: (printerName: string) => Promise<PrinterAvailability>
   print: (options: PrintOptions) => Promise<PrintResult>
   getStatus: (printerName: string) => Promise<PrinterStatus>
+  resetPrinter: (printerName: string) => Promise<ResetResult>
 }
 
 export interface SettingsAPI {

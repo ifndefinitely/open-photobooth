@@ -65,6 +65,8 @@ function PrinterSection(): React.JSX.Element {
   const [isLoadingPrinters, setIsLoadingPrinters] = useState(false)
   const [testStatus, setTestStatus] = useState<{ success: boolean; message: string } | null>(null)
   const [isTesting, setIsTesting] = useState(false)
+  const [resetStatus, setResetStatus] = useState<{ success: boolean; message: string } | null>(null)
+  const [isResetting, setIsResetting] = useState(false)
 
   const loadPrinters = useCallback(async () => {
     setIsLoadingPrinters(true)
@@ -81,6 +83,32 @@ function PrinterSection(): React.JSX.Element {
   useEffect(() => {
     loadPrinters()
   }, [loadPrinters])
+
+  const handleResetPrinter = async (): Promise<void> => {
+    if (!printerName) return
+    setIsResetting(true)
+    setResetStatus(null)
+    try {
+      const result = await window.api.printer.resetPrinter(printerName)
+      if (result.success) {
+        const statusNote = result.printerStatus ? ` Printer status: ${result.printerStatus}.` : ''
+        setResetStatus({ success: true, message: `Printer reset successfully.${statusNote}` })
+      } else {
+        setResetStatus({
+          success: false,
+          message: `Reset failed (${result.error ?? 'unknown'}). Try unplugging and replugging the USB cable.`
+        })
+      }
+    } catch (error) {
+      setResetStatus({
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    } finally {
+      setIsResetting(false)
+      refreshStatus()
+    }
+  }
 
   const handleTestPrint = async (): Promise<void> => {
     if (!printerName) return
@@ -368,6 +396,23 @@ function PrinterSection(): React.JSX.Element {
             max={60}
           />
         </div>
+
+        {/* Reset printer */}
+        <button
+          className={styles.testButton}
+          onClick={handleResetPrinter}
+          disabled={!printerName || isResetting}
+        >
+          {isResetting ? 'Resetting...' : 'Reset Printer'}
+        </button>
+
+        {resetStatus && (
+          <div
+            className={`${styles.testStatus} ${resetStatus.success ? styles.testStatusSuccess : styles.testStatusError}`}
+          >
+            {resetStatus.message}
+          </div>
+        )}
 
         {/* Test print */}
         <button

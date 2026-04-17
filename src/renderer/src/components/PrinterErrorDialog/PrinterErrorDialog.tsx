@@ -7,6 +7,10 @@ import PinDialog from '@/components/PinDialog/PinDialog'
 import type { PrintJobError } from '@/hooks/usePrintJob'
 import styles from './PrinterErrorDialog.module.css'
 
+interface ResetState {
+  status: 'idle' | 'inProgress' | 'success' | 'failed'
+}
+
 interface Props {
   error: PrintJobError
   onRetry: () => void
@@ -32,6 +36,7 @@ function PrinterErrorDialog({ error, onRetry }: Props): React.JSX.Element {
   const printerName = usePrinterSettingsStore((s) => s.printerName)
   const setWasPrinted = useStripStore((s) => s.setWasPrinted)
   const [pinOpen, setPinOpen] = useState(false)
+  const [resetState, setResetState] = useState<ResetState>({ status: 'idle' })
 
   const reasonKey = REASON_KEY_MAP[error.reason] ?? 'printer.error.needsAttention'
   const plainReason = t(reasonKey)
@@ -39,6 +44,17 @@ function PrinterErrorDialog({ error, onRetry }: Props): React.JSX.Element {
   const handleSkip = (): void => {
     setWasPrinted(false)
     navigateTo('thankyou')
+  }
+
+  const handleReset = async (): Promise<void> => {
+    if (!printerName || resetState.status === 'inProgress') return
+    setResetState({ status: 'inProgress' })
+    try {
+      const result = await window.api.printer.resetPrinter(printerName)
+      setResetState({ status: result.success ? 'success' : 'failed' })
+    } catch {
+      setResetState({ status: 'failed' })
+    }
   }
 
   return (
@@ -59,9 +75,25 @@ function PrinterErrorDialog({ error, onRetry }: Props): React.JSX.Element {
             </div>
           </details>
 
+          {resetState.status === 'success' && (
+            <p className={styles.resetSuccess}>{t('printer.reset.success')}</p>
+          )}
+          {resetState.status === 'failed' && (
+            <p className={styles.resetFailed}>{t('printer.reset.failed')}</p>
+          )}
+
           <div className={styles.actions}>
             <button className={styles.buttonPrimary} onClick={onRetry}>
               {t('printer.error.buttonRetry')}
+            </button>
+            <button
+              className={styles.buttonSecondary}
+              onClick={handleReset}
+              disabled={!printerName || resetState.status === 'inProgress'}
+            >
+              {resetState.status === 'inProgress'
+                ? t('printer.reset.inProgress')
+                : t('printer.error.buttonReset')}
             </button>
             <button className={styles.buttonSecondary} onClick={handleSkip}>
               {t('printer.error.buttonSkip')}

@@ -11,6 +11,7 @@ import * as musicLibraryService from './musicLibraryService'
 import { MusicLibraryError } from './musicLibraryService'
 import type { ImportErrorReason } from './musicLibraryService'
 import * as statusService from './printerStatusService'
+import * as printerResetService from './printerResetService'
 
 interface FileDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>
@@ -235,6 +236,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('printer:get-status', async (_event, printerName: string) => {
     return statusService.getStatus(printerName)
+  })
+
+  // ── Printer Reset ──
+
+  ipcMain.handle('printer:reset', async (_event, printerName: string) => {
+    return printerResetService.resetPrinter(printerName)
   })
 
   // ── Log buffer ──

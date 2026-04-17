@@ -10,7 +10,9 @@ const api = {
       ipcRenderer.invoke('printer:check-availability', printerName),
     print: (options: unknown): Promise<unknown> => ipcRenderer.invoke('printer:print', options),
     getStatus: (printerName: string): Promise<unknown> =>
-      ipcRenderer.invoke('printer:get-status', printerName)
+      ipcRenderer.invoke('printer:get-status', printerName),
+    resetPrinter: (printerName: string): Promise<unknown> =>
+      ipcRenderer.invoke('printer:reset', printerName)
   },
   settings: {
     get: (key: string): Promise<unknown> => ipcRenderer.invoke('settings:get', key),

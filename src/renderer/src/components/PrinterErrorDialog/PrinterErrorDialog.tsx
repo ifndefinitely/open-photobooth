@@ -57,6 +57,20 @@ function PrinterErrorDialog({ error, onRetry }: Props): React.JSX.Element {
     }
   }
 
+  const handleRetry = async (): Promise<void> => {
+    if (resetState.status === 'inProgress') return
+    if (printerName) {
+      setResetState({ status: 'inProgress' })
+      try {
+        await window.api.printer.resetPrinter(printerName)
+      } catch {
+        // proceed to retry regardless
+      }
+      setResetState({ status: 'idle' })
+    }
+    onRetry()
+  }
+
   return (
     <>
       <div className={styles.backdrop} role="dialog" aria-modal="true">
@@ -83,8 +97,14 @@ function PrinterErrorDialog({ error, onRetry }: Props): React.JSX.Element {
           )}
 
           <div className={styles.actions}>
-            <button className={styles.buttonPrimary} onClick={onRetry}>
-              {t('printer.error.buttonRetry')}
+            <button
+              className={styles.buttonPrimary}
+              onClick={() => void handleRetry()}
+              disabled={resetState.status === 'inProgress'}
+            >
+              {resetState.status === 'inProgress'
+                ? t('printer.reset.inProgress')
+                : t('printer.error.buttonRetry')}
             </button>
             <button
               className={styles.buttonSecondary}

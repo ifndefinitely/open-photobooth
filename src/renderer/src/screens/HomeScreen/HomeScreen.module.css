@@ -78,16 +78,9 @@
   color: #000;
 }
 
-.bannerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 16px;
-}
-
 .bannerResetButton {
-  flex-shrink: 0;
+  position: absolute;
+  left: 24px;
   padding: 8px 20px;
   min-height: 44px;
   font-family: var(--font-body);

@@ -68,16 +68,14 @@ function HomeScreen(): React.JSX.Element {
       )}
       {bannerMode === 'captureOnly' && (
         <div className={`${styles.banner} ${styles.bannerCaptureOnly}`}>
-          <div className={styles.bannerRow}>
-            <span>{t('home.printer.unavailable.captureOnly')}</span>
-            <button
-              className={`${styles.bannerResetButton} ${bannerResetState === 'failed' ? styles.bannerResetButtonFailed : ''}`}
-              onClick={handleBannerReset}
-              disabled={bannerResetState === 'inProgress'}
-            >
-              {bannerResetLabel()}
-            </button>
-          </div>
+          <button
+            className={`${styles.bannerResetButton} ${bannerResetState === 'failed' ? styles.bannerResetButtonFailed : ''}`}
+            onClick={handleBannerReset}
+            disabled={bannerResetState === 'inProgress'}
+          >
+            {bannerResetLabel()}
+          </button>
+          {t('home.printer.unavailable.captureOnly')}
         </div>
       )}
       <CameraPreview className={styles.preview} />

@@ -100,6 +100,22 @@ function ReviewScreen(): React.JSX.Element {
     }
   }
 
+  const handleTryAgainAfterError = useCallback(async (): Promise<void> => {
+    setConfirmAction(null)
+    if (printerName) {
+      try {
+        const result = await window.api.printer.resetPrinter(printerName)
+        if (result.success) {
+          const fresh = await window.api.printer.getStatus(printerName)
+          setStatus(fresh as PrinterStatus)
+        }
+      } catch {
+        // proceed to availability check regardless
+      }
+    }
+    void handlePrintPress()
+  }, [printerName, setStatus, handlePrintPress])
+
   // Orchestrate the composition pipeline
   useStripComposition()
 
@@ -213,10 +229,7 @@ function ReviewScreen(): React.JSX.Element {
           confirmLabel={t('error.tryAgain')}
           cancelLabel={t('common.back')}
           variant="danger"
-          onConfirm={() => {
-            setConfirmAction(null)
-            handlePrintPress()
-          }}
+          onConfirm={() => void handleTryAgainAfterError()}
           onCancel={() => setConfirmAction(null)}
         />
       )}

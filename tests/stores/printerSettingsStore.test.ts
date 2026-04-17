@@ -21,7 +21,7 @@ describe('printerSettingsStore — reliability settings', () => {
     expect(s.verificationPollInterval).toBe(2)
     expect(s.autoRetryOnce).toBe(true)
     expect(s.offlineBehaviour).toBe('captureOnly')
-    expect(s.healthPollInterval).toBe(10)
+    expect(s.healthPollInterval).toBe(5)
   })
 
   it('setters update the respective fields', () => {

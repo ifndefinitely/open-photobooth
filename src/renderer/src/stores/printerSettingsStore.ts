@@ -56,7 +56,7 @@ export const usePrinterSettingsStore = create<PrinterSettingsState>((set) => ({
   verificationPollInterval: 2,
   autoRetryOnce: true,
   offlineBehaviour: 'captureOnly',
-  healthPollInterval: 10,
+  healthPollInterval: 5,
 
   setPrinterName: (printerName) => set({ printerName }),
   setPaperSize: (paperSize) => set({ paperSize }),

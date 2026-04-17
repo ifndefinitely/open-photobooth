@@ -286,7 +286,34 @@ function quotePsArg(arg: string): string {
 export async function getStatus(printerName: string): Promise<PrinterStatus> {
   if (!isWindows()) return stubStatus(printerName)
 
-  const script = `Get-Printer -Name ${quotePsArg(printerName)} | Select-Object Name,PrinterStatus,JobCount | ConvertTo-Json -Compress`
+  // When PrinterStatus is 0 (Normal/Ready) and the port is a USB port with no active
+  // jobs, probe the port directly. The Windows print spooler caches PrinterStatus and
+  // does not update it on USB disconnect — the cached "ready" value can persist
+  // indefinitely. Opening the port via FileStream forces an OS-level check: if the
+  // USB device is gone the open fails and we report the printer as offline immediately.
+  // The probe is skipped when jobs are queued (printer is clearly in use).
+  const safeName = quotePsArg(printerName)
+  const script = `
+$ErrorActionPreference = 'SilentlyContinue'
+$p = Get-Printer -Name ${safeName} -ErrorAction SilentlyContinue
+if ($null -eq $p) {
+  [PSCustomObject]@{Name=${safeName};PrinterStatus=128;JobCount=0} | ConvertTo-Json -Compress
+} else {
+  $sc = [int]$p.PrinterStatus
+  $jc = if ($null -ne $p.JobCount) { [int]$p.JobCount } else { 0 }
+  $forceOffline = $false
+  if ($sc -eq 0 -and $p.PortName -match '^USB\\d+$' -and $jc -eq 0) {
+    try {
+      $bs = [char]92
+      $portPath = "$bs$bs.$bs" + $p.PortName
+      $fs = New-Object System.IO.FileStream($portPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Write, [System.IO.FileShare]::ReadWrite)
+      $fs.Dispose()
+    } catch { $forceOffline = $true }
+  }
+  $finalSc = if ($forceOffline) { 128 } else { $sc }
+  [PSCustomObject]@{Name=$p.Name;PrinterStatus=$finalSc;JobCount=$jc} | ConvertTo-Json -Compress
+}
+`
   try {
     const stdout = await runPowerShell(script)
     const parsed = parseGetPrinterOutput(stdout)
@@ -399,13 +426,11 @@ export function printerStatusToAbortReason(code: number): string | null {
   return null
 }
 
-const BAD_JOB_LABELS = new Set(['Error', 'PaperOut', 'UserIntervention', 'Paused'])
+const BAD_JOB_LABELS = new Set(['Error', 'PaperOut', 'UserIntervention', 'Paused', 'Offline'])
 
-// A healthy printer transitions from Spooling to Printing within a few seconds.
-// If the job stays in Spooling without ever reaching Printing for this long,
-// the hardware is likely asleep or the driver is in a zombie state.
-// (Canon SELPHY CP1500 reports PrinterStatus 0 "ready" even during deep sleep,
-// so this stall detection is the only way to catch it quickly.)
+// A job that never reaches Printing state within this window is considered stalled.
+// Covers sleep, power-off, and driver zombie states — the job may show any status
+// (Spooling, Normal/0, or nothing) depending on when Windows detects the disconnect.
 const STALLED_IN_SPOOLER_MS = 20_000
 
 export async function waitForJobCompletion(
@@ -419,7 +444,7 @@ export async function waitForJobCompletion(
 
   const deadline = Date.now() + options.timeoutMs
   let lastLabels: string[] = []
-  let firstSeenSpoolingAt: number | null = null
+  let firstSeenAt: number | null = null
   let everSeenPrinting = false
 
   while (Date.now() < deadline) {
@@ -455,15 +480,17 @@ export async function waitForJobCompletion(
       everSeenPrinting = true
     }
 
-    // Early abort: job stuck in Spooling without ever reaching Printing.
-    if (!everSeenPrinting && lastLabels.includes('Spooling')) {
-      if (firstSeenSpoolingAt === null) {
-        firstSeenSpoolingAt = Date.now()
-      } else if (Date.now() - firstSeenSpoolingAt >= STALLED_IN_SPOOLER_MS) {
+    // Early abort: job exists but has never reached Printing within the stall window.
+    // Triggers regardless of what status bits are set — covers Spooling, Normal (0),
+    // and any other non-Printing state (e.g. printer powered off after job submission).
+    if (!everSeenPrinting) {
+      if (firstSeenAt === null) {
+        firstSeenAt = Date.now()
+      } else if (Date.now() - firstSeenAt >= STALLED_IN_SPOOLER_MS) {
         loggingService.log(
           'WARN',
           'Printer',
-          `Job ${jobId} stalled in Spooling for ${STALLED_IN_SPOOLER_MS / 1000}s without reaching Printing — aborting early`
+          `Job ${jobId} stalled for ${STALLED_IN_SPOOLER_MS / 1000}s without reaching Printing (labels: [${lastLabels.join(', ')}]) — aborting early`
         )
         return { verified: false, reason: 'stalled_in_spooler', lastLabels }
       }

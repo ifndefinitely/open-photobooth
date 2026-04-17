@@ -15,6 +15,7 @@ export interface PrinterAvailability {
   status: string // 'ready' | 'busy' | 'warmingUp' | 'offline' | 'error' | 'not_found'
   detail?: string
   rawStatusCode?: number
+  specificReason?: string // e.g. 'paper_out', 'paper_jam', 'offline' — more actionable than status
 }
 
 export interface CheckAvailabilityOptions {
@@ -90,7 +91,8 @@ export async function checkPrinterAvailability(
     available,
     status: status.state,
     detail: status.detail,
-    rawStatusCode: status.rawStatusCode
+    rawStatusCode: status.rawStatusCode,
+    specificReason: statusService.printerStatusToAbortReason(status.rawStatusCode) ?? undefined
   }
 }
 

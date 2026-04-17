@@ -96,7 +96,7 @@ export function usePrintJob(): PrintJobResult {
       const availability = await window.api.printer.checkAvailability(printerName)
       if (!availability.available) {
         const err: PrintJobError = {
-          reason: availability.status,
+          reason: availability.specificReason ?? availability.status,
           detail: availability.detail ?? `Printer status: ${availability.status}`
         }
         if (currentAttempt === 1 && autoRetryOnce) {

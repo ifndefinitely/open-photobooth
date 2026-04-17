@@ -14,6 +14,7 @@ interface Props {
 
 const REASON_KEY_MAP: Record<string, string> = {
   paper_out: 'printer.error.paperOut',
+  paper_jam: 'printer.error.paperJam',
   job_error: 'printer.error.needsAttention',
   needs_attention: 'printer.error.needsAttention',
   paused: 'printer.error.needsAttention',

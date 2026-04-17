@@ -5,7 +5,8 @@ vi.mock('../../src/main/printerStatusService', () => ({
   getStatus: vi.fn(),
   waitForReady: vi.fn(),
   getJobs: vi.fn(),
-  waitForJobCompletion: vi.fn()
+  waitForJobCompletion: vi.fn(),
+  printerStatusToAbortReason: vi.fn().mockReturnValue(null)
 }))
 
 vi.mock('../../src/main/loggingService', () => ({
@@ -100,6 +101,26 @@ describe('checkPrinterAvailability', () => {
       timeoutMs: 10_000,
       pollIntervalMs: 500
     })
+  })
+
+  it('includes specificReason when printerStatusToAbortReason returns one', async () => {
+    vi.mocked(statusService.waitForReady).mockResolvedValue({
+      name: 'Canon SELPHY CP1500',
+      state: 'error',
+      rawStatusCode: 16,
+      jobCount: 0,
+      detail: 'PaperOut (code 16)',
+      queriedAt: Date.now()
+    })
+    vi.mocked(statusService.printerStatusToAbortReason).mockReturnValue('paper_out')
+
+    const result = await checkPrinterAvailability(mockWindow, 'Canon SELPHY CP1500', {
+      preflightTimeoutMs: 10_000
+    })
+
+    expect(result.available).toBe(false)
+    expect(result.status).toBe('error')
+    expect(result.specificReason).toBe('paper_out')
   })
 
   it('returns unavailable when printer is not in the OS list', async () => {

@@ -77,19 +77,78 @@ export function parseGetJobsOutput(stdout: string): PrintJob[] {
   }
 }
 
-// PrinterStatus codes from Microsoft PrintManagement module.
-const READY_CODES = new Set([0, 3])
-const BUSY_CODES = new Set([4, 6, 13, 14, 15, 19])
-const WARMING_CODES = new Set([1, 2, 5, 10, 18, 20, 21])
-const OFFLINE_CODES = new Set([7, 12, 17])
-const ERROR_CODES = new Set([8, 9, 11, 16, 22])
+// Windows PRINTER_STATUS bit flags (winspool.h / PrintManagement module).
+// These are a bit-field, not a sequential enum — multiple flags can be set at once.
+export const PRINTER_STATUS = {
+  PAUSED: 0x1,
+  ERROR: 0x2,
+  PENDING_DELETION: 0x4,
+  PAPER_JAM: 0x8,
+  PAPER_OUT: 0x10,
+  MANUAL_FEED: 0x20,
+  PAPER_PROBLEM: 0x40,
+  OFFLINE: 0x80,
+  IO_ACTIVE: 0x100,
+  BUSY: 0x200,
+  PRINTING: 0x400,
+  OUTPUT_BIN_FULL: 0x800,
+  NOT_AVAILABLE: 0x1000,
+  WAITING: 0x2000,
+  PROCESSING: 0x4000,
+  INITIALIZING: 0x8000,
+  WARMING_UP: 0x10000,
+  TONER_LOW: 0x20000,
+  NO_TONER: 0x40000,
+  PAGE_PUNT: 0x80000,
+  USER_INTERVENTION: 0x100000,
+  OUT_OF_MEMORY: 0x200000,
+  DOOR_OPEN: 0x400000,
+  SERVER_UNKNOWN: 0x800000,
+  POWER_SAVE: 0x1000000
+} as const
 
+const PS = PRINTER_STATUS
+
+/** Flags that indicate a hard error requiring human intervention. */
+const ERROR_FLAGS =
+  PS.PAPER_JAM |
+  PS.PAPER_OUT |
+  PS.PAPER_PROBLEM |
+  PS.OUTPUT_BIN_FULL |
+  PS.OUT_OF_MEMORY |
+  PS.DOOR_OPEN |
+  PS.USER_INTERVENTION |
+  PS.NO_TONER |
+  PS.ERROR
+
+/** Flags that indicate the printer is unreachable. */
+const OFFLINE_FLAGS = PS.OFFLINE | PS.NOT_AVAILABLE | PS.SERVER_UNKNOWN
+
+/** Flags that indicate a transient warm-up / initialization state. */
+const WARMING_FLAGS =
+  PS.WARMING_UP | PS.INITIALIZING | PS.POWER_SAVE | PS.PAUSED | PS.PENDING_DELETION
+
+/** Flags that indicate the printer is busy but functional. */
+const BUSY_FLAGS =
+  PS.BUSY |
+  PS.PRINTING |
+  PS.IO_ACTIVE |
+  PS.PROCESSING |
+  PS.MANUAL_FEED |
+  PS.WAITING |
+  PS.TONER_LOW |
+  PS.PAGE_PUNT
+
+/**
+ * Map a Windows PrinterStatus bit-field to a simplified state.
+ * Priority: error > offline > warmingUp > busy > ready.
+ */
 export function mapStatusCode(code: number): PrinterState {
-  if (READY_CODES.has(code)) return 'ready'
-  if (BUSY_CODES.has(code)) return 'busy'
-  if (WARMING_CODES.has(code)) return 'warmingUp'
-  if (OFFLINE_CODES.has(code)) return 'offline'
-  if (ERROR_CODES.has(code)) return 'error'
+  if (code === 0) return 'ready'
+  if (code & ERROR_FLAGS) return 'error'
+  if (code & OFFLINE_FLAGS) return 'offline'
+  if (code & WARMING_FLAGS) return 'warmingUp'
+  if (code & BUSY_FLAGS) return 'busy'
   return 'error'
 }
 
@@ -113,23 +172,43 @@ export function decodeJobStatus(value: number): string[] {
   return JOB_STATUS_BITS.filter(([bit]) => (value & bit) !== 0).map(([, label]) => label)
 }
 
-export function statusDetail(state: PrinterState, code: number): string {
-  switch (state) {
-    case 'ready':
-      return `Ready (code ${code})`
-    case 'busy':
-      return `Busy (code ${code})`
-    case 'warmingUp':
-      return code === 21 ? 'Warming up (PowerSave)' : `Warming up (code ${code})`
-    case 'offline':
-      return `Offline (code ${code})`
-    case 'error':
-      return `Error (code ${code})`
-    default: {
-      const _exhaustive: never = state
-      return _exhaustive
-    }
-  }
+const PRINTER_STATUS_LABELS: Array<[number, string]> = [
+  [PS.PAUSED, 'Paused'],
+  [PS.ERROR, 'Error'],
+  [PS.PENDING_DELETION, 'PendingDeletion'],
+  [PS.PAPER_JAM, 'PaperJam'],
+  [PS.PAPER_OUT, 'PaperOut'],
+  [PS.MANUAL_FEED, 'ManualFeed'],
+  [PS.PAPER_PROBLEM, 'PaperProblem'],
+  [PS.OFFLINE, 'Offline'],
+  [PS.IO_ACTIVE, 'IOActive'],
+  [PS.BUSY, 'Busy'],
+  [PS.PRINTING, 'Printing'],
+  [PS.OUTPUT_BIN_FULL, 'OutputBinFull'],
+  [PS.NOT_AVAILABLE, 'NotAvailable'],
+  [PS.WAITING, 'Waiting'],
+  [PS.PROCESSING, 'Processing'],
+  [PS.INITIALIZING, 'Initializing'],
+  [PS.WARMING_UP, 'WarmingUp'],
+  [PS.TONER_LOW, 'TonerLow'],
+  [PS.NO_TONER, 'NoToner'],
+  [PS.PAGE_PUNT, 'PagePunt'],
+  [PS.USER_INTERVENTION, 'UserIntervention'],
+  [PS.OUT_OF_MEMORY, 'OutOfMemory'],
+  [PS.DOOR_OPEN, 'DoorOpen'],
+  [PS.SERVER_UNKNOWN, 'ServerUnknown'],
+  [PS.POWER_SAVE, 'PowerSave']
+]
+
+/** Decode a bit-field printer status code into human-readable flag labels. */
+export function decodePrinterStatus(code: number): string[] {
+  if (code === 0) return ['Normal']
+  return PRINTER_STATUS_LABELS.filter(([bit]) => (code & bit) !== 0).map(([, label]) => label)
+}
+
+export function statusDetail(_state: PrinterState, code: number): string {
+  const labels = decodePrinterStatus(code)
+  return `${labels.join(', ')} (code ${code})`
 }
 
 // ── Non-Windows stub ──
@@ -301,6 +380,25 @@ export type JobWaitResult =
   | { verified: true }
   | { verified: false; reason: string; lastLabels: string[] }
 
+/**
+ * If the printer status bit-field indicates a condition that should abort job
+ * verification, return a specific reason string. Returns null if verification
+ * should continue (printer is fine or in a transient state).
+ */
+export function printerStatusToAbortReason(code: number): string | null {
+  if (code & PS.PAPER_OUT) return 'paper_out'
+  if (code & PS.PAPER_JAM) return 'paper_jam'
+  if (code & PS.DOOR_OPEN) return 'needs_attention'
+  if (code & PS.OUT_OF_MEMORY) return 'needs_attention'
+  if (code & PS.NO_TONER) return 'needs_attention'
+  if (code & PS.USER_INTERVENTION) return 'needs_attention'
+  if (code & PS.OFFLINE) return 'offline'
+  if (code & PS.NOT_AVAILABLE) return 'offline'
+  // Generic ERROR flag without a more specific one doesn't abort —
+  // the job status bits are more authoritative for generic errors.
+  return null
+}
+
 const BAD_JOB_LABELS = new Set(['Error', 'PaperOut', 'UserIntervention', 'Paused'])
 
 // A healthy printer transitions from Spooling to Printing within a few seconds.
@@ -314,7 +412,8 @@ export async function waitForJobCompletion(
   printerName: string,
   jobId: number,
   options: WaitForJobOptions,
-  getJobsFn: (name: string) => Promise<PrintJob[]> = getJobs
+  getJobsFn: (name: string) => Promise<PrintJob[]> = getJobs,
+  getStatusFn: (name: string) => Promise<PrinterStatus> = getStatus
 ): Promise<JobWaitResult> {
   if (!isWindows()) return { verified: true }
 
@@ -336,6 +435,19 @@ export async function waitForJobCompletion(
     const bad = lastLabels.find((l) => BAD_JOB_LABELS.has(l))
     if (bad) {
       return { verified: false, reason: labelToReason(bad), lastLabels }
+    }
+
+    // Check printer-level status for conditions the job bits may not reflect
+    // (e.g. Canon SELPHY reports paper-out via PrinterStatus, not job status).
+    const printerStatus = await getStatusFn(printerName)
+    const printerReason = printerStatusToAbortReason(printerStatus.rawStatusCode)
+    if (printerReason) {
+      loggingService.log(
+        'WARN',
+        'Printer',
+        `Job ${jobId}: printer reports ${printerReason} (status code ${printerStatus.rawStatusCode}), aborting verification`
+      )
+      return { verified: false, reason: printerReason, lastLabels }
     }
 
     // Track whether the job has ever reached Printing state.

@@ -161,6 +161,27 @@ describe('usePrintJob — state machine', () => {
     expect(window.api.printer.print).not.toHaveBeenCalled()
   }, 10000)
 
+  it('uses specificReason from preflight when available', async () => {
+    vi.mocked(window.api.printer.checkAvailability).mockResolvedValue({
+      available: false,
+      status: 'error',
+      specificReason: 'paper_out',
+      detail: 'PaperOut (code 16)',
+      rawStatusCode: 16
+    })
+
+    const { result } = renderHook(() => usePrintJob())
+
+    await waitFor(
+      () => {
+        expect(result.current.state).toBe('failed_hard')
+      },
+      { timeout: 3000 }
+    )
+    expect(result.current.error?.reason).toBe('paper_out')
+    expect(window.api.printer.print).not.toHaveBeenCalled()
+  }, 10000)
+
   it('manual retry from failed_hard restarts the flow', async () => {
     vi.mocked(window.api.printer.checkAvailability).mockResolvedValue({
       available: true,

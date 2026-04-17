@@ -11,6 +11,7 @@ export interface PrinterAvailability {
   status: string
   detail?: string
   rawStatusCode?: number
+  specificReason?: string
 }
 
 export interface PrintOptions {

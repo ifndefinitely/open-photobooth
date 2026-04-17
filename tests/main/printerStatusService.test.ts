@@ -4,9 +4,12 @@ import {
   parseGetJobsOutput,
   mapStatusCode,
   decodeJobStatus,
+  decodePrinterStatus,
   statusDetail,
+  printerStatusToAbortReason,
   waitForJobCompletion,
-  type PrinterState,
+  PRINTER_STATUS,
+  type PrinterStatus,
   type PrintJob
 } from '../../src/main/printerStatusService'
 
@@ -15,6 +18,17 @@ vi.mock('../../src/main/loggingService', () => ({
   init: vi.fn(),
   getLogPath: vi.fn()
 }))
+
+// ── Shared helpers for waitForJobCompletion tests ──
+
+const readyStatus: PrinterStatus = {
+  name: 'TestPrinter',
+  state: 'ready',
+  rawStatusCode: 0,
+  jobCount: 0,
+  detail: 'Normal (code 0)',
+  queriedAt: Date.now()
+}
 
 describe('printerStatusService — parseGetPrinterOutput', () => {
   it('parses a compressed JSON status payload from PowerShell', () => {
@@ -63,38 +77,75 @@ describe('printerStatusService — parseGetJobsOutput', () => {
   })
 })
 
-describe('printerStatusService — mapStatusCode', () => {
-  const cases: Array<[number, PrinterState]> = [
-    [0, 'ready'],
-    [3, 'ready'],
-    [4, 'busy'],
-    [6, 'busy'],
-    [13, 'busy'],
-    [14, 'busy'],
-    [15, 'busy'],
-    [19, 'busy'],
-    [1, 'warmingUp'],
-    [2, 'warmingUp'],
-    [5, 'warmingUp'],
-    [10, 'warmingUp'],
-    [18, 'warmingUp'],
-    [20, 'warmingUp'],
-    [21, 'warmingUp'],
-    [7, 'offline'],
-    [12, 'offline'],
-    [17, 'offline'],
-    [8, 'error'],
-    [9, 'error'],
-    [11, 'error'],
-    [16, 'error'],
-    [22, 'error']
-  ]
-  it.each(cases)('maps PrinterStatus %d to %s', (code, expected) => {
-    expect(mapStatusCode(code)).toBe(expected)
+describe('printerStatusService — mapStatusCode (bit flags)', () => {
+  const PS = PRINTER_STATUS
+
+  it('maps code 0 (no flags) to ready', () => {
+    expect(mapStatusCode(0)).toBe('ready')
   })
 
-  it('defaults unknown codes to error', () => {
-    expect(mapStatusCode(999)).toBe('error')
+  it.each([
+    [PS.ERROR, 'ERROR'],
+    [PS.PAPER_JAM, 'PAPER_JAM'],
+    [PS.PAPER_OUT, 'PAPER_OUT'],
+    [PS.PAPER_PROBLEM, 'PAPER_PROBLEM'],
+    [PS.OUTPUT_BIN_FULL, 'OUTPUT_BIN_FULL'],
+    [PS.NO_TONER, 'NO_TONER'],
+    [PS.USER_INTERVENTION, 'USER_INTERVENTION'],
+    [PS.OUT_OF_MEMORY, 'OUT_OF_MEMORY'],
+    [PS.DOOR_OPEN, 'DOOR_OPEN']
+  ])('maps error flag 0x%x (%s) to error', (code) => {
+    expect(mapStatusCode(code)).toBe('error')
+  })
+
+  it.each([
+    [PS.OFFLINE, 'OFFLINE'],
+    [PS.NOT_AVAILABLE, 'NOT_AVAILABLE'],
+    [PS.SERVER_UNKNOWN, 'SERVER_UNKNOWN']
+  ])('maps offline flag 0x%x (%s) to offline', (code) => {
+    expect(mapStatusCode(code)).toBe('offline')
+  })
+
+  it.each([
+    [PS.PAUSED, 'PAUSED'],
+    [PS.PENDING_DELETION, 'PENDING_DELETION'],
+    [PS.INITIALIZING, 'INITIALIZING'],
+    [PS.WARMING_UP, 'WARMING_UP'],
+    [PS.POWER_SAVE, 'POWER_SAVE']
+  ])('maps warming flag 0x%x (%s) to warmingUp', (code) => {
+    expect(mapStatusCode(code)).toBe('warmingUp')
+  })
+
+  it.each([
+    [PS.MANUAL_FEED, 'MANUAL_FEED'],
+    [PS.IO_ACTIVE, 'IO_ACTIVE'],
+    [PS.BUSY, 'BUSY'],
+    [PS.PRINTING, 'PRINTING'],
+    [PS.WAITING, 'WAITING'],
+    [PS.PROCESSING, 'PROCESSING'],
+    [PS.TONER_LOW, 'TONER_LOW'],
+    [PS.PAGE_PUNT, 'PAGE_PUNT']
+  ])('maps busy flag 0x%x (%s) to busy', (code) => {
+    expect(mapStatusCode(code)).toBe('busy')
+  })
+
+  it('error flags take priority over other flags', () => {
+    expect(mapStatusCode(PS.PAPER_OUT | PS.PRINTING)).toBe('error')
+    expect(mapStatusCode(PS.ERROR | PS.PAUSED)).toBe('error')
+    expect(mapStatusCode(PS.PAPER_JAM | PS.OFFLINE)).toBe('error')
+  })
+
+  it('offline flags take priority over warming and busy', () => {
+    expect(mapStatusCode(PS.OFFLINE | PS.PAUSED)).toBe('offline')
+    expect(mapStatusCode(PS.OFFLINE | PS.BUSY)).toBe('offline')
+  })
+
+  it('warming flags take priority over busy', () => {
+    expect(mapStatusCode(PS.WARMING_UP | PS.BUSY)).toBe('warmingUp')
+  })
+
+  it('defaults unknown flags to error', () => {
+    expect(mapStatusCode(0x2000000)).toBe('error')
   })
 })
 
@@ -117,22 +168,87 @@ describe('printerStatusService — decodeJobStatus', () => {
   })
 })
 
-describe('printerStatusService — statusDetail', () => {
-  it('reports PowerSave specifically for warmingUp code 21', () => {
-    expect(statusDetail('warmingUp', 21)).toBe('Warming up (PowerSave)')
+describe('printerStatusService — decodePrinterStatus', () => {
+  it('returns Normal for code 0', () => {
+    expect(decodePrinterStatus(0)).toEqual(['Normal'])
   })
-  it('falls back to a generic warming message for other warming codes', () => {
-    expect(statusDetail('warmingUp', 5)).toBe('Warming up (code 5)')
+
+  it('decodes a single flag', () => {
+    expect(decodePrinterStatus(PRINTER_STATUS.PAPER_OUT)).toEqual(['PaperOut'])
   })
-  it('formats ready/busy/offline/error with the code', () => {
-    expect(statusDetail('ready', 3)).toBe('Ready (code 3)')
-    expect(statusDetail('busy', 4)).toBe('Busy (code 4)')
-    expect(statusDetail('offline', 7)).toBe('Offline (code 7)')
-    expect(statusDetail('error', 9)).toBe('Error (code 9)')
+
+  it('decodes combined flags in bit order', () => {
+    // PAUSED (0x1) + PAPER_OUT (0x10) = 0x11
+    expect(decodePrinterStatus(0x11)).toEqual(['Paused', 'PaperOut'])
+  })
+
+  it('decodes all error-class flags', () => {
+    const labels = decodePrinterStatus(PRINTER_STATUS.PAPER_JAM | PRINTER_STATUS.DOOR_OPEN)
+    expect(labels).toContain('PaperJam')
+    expect(labels).toContain('DoorOpen')
   })
 })
 
-describe('waitForJobCompletion — stall detection', () => {
+describe('printerStatusService — statusDetail', () => {
+  it('formats code 0 with Normal label', () => {
+    expect(statusDetail('ready', 0)).toBe('Normal (code 0)')
+  })
+
+  it('formats code 16 (PAPER_OUT) with decoded label', () => {
+    expect(statusDetail('error', 16)).toBe('PaperOut (code 16)')
+  })
+
+  it('formats combined flags', () => {
+    // PAUSED (0x1) + PAPER_OUT (0x10) = 17
+    expect(statusDetail('error', 17)).toBe('Paused, PaperOut (code 17)')
+  })
+})
+
+describe('printerStatusService — printerStatusToAbortReason', () => {
+  const PS = PRINTER_STATUS
+
+  it('returns paper_out for PAPER_OUT flag', () => {
+    expect(printerStatusToAbortReason(PS.PAPER_OUT)).toBe('paper_out')
+  })
+
+  it('returns paper_jam for PAPER_JAM flag', () => {
+    expect(printerStatusToAbortReason(PS.PAPER_JAM)).toBe('paper_jam')
+  })
+
+  it('returns needs_attention for USER_INTERVENTION', () => {
+    expect(printerStatusToAbortReason(PS.USER_INTERVENTION)).toBe('needs_attention')
+  })
+
+  it('returns needs_attention for DOOR_OPEN', () => {
+    expect(printerStatusToAbortReason(PS.DOOR_OPEN)).toBe('needs_attention')
+  })
+
+  it('returns offline for OFFLINE flag', () => {
+    expect(printerStatusToAbortReason(PS.OFFLINE)).toBe('offline')
+  })
+
+  it('returns offline for NOT_AVAILABLE flag', () => {
+    expect(printerStatusToAbortReason(PS.NOT_AVAILABLE)).toBe('offline')
+  })
+
+  it('returns null for code 0 (ready)', () => {
+    expect(printerStatusToAbortReason(0)).toBeNull()
+  })
+
+  it('returns null for BUSY flag', () => {
+    expect(printerStatusToAbortReason(PS.BUSY)).toBeNull()
+  })
+
+  it('returns null for generic ERROR flag alone', () => {
+    expect(printerStatusToAbortReason(PS.ERROR)).toBeNull()
+  })
+
+  it('paper_out takes priority over offline in combined flags', () => {
+    expect(printerStatusToAbortReason(PS.PAPER_OUT | PS.OFFLINE)).toBe('paper_out')
+  })
+})
+
+describe('waitForJobCompletion', () => {
   const originalPlatform = process.platform
 
   beforeEach(() => {
@@ -144,6 +260,10 @@ describe('waitForJobCompletion — stall detection', () => {
     vi.useRealTimers()
     Object.defineProperty(process, 'platform', { value: originalPlatform })
   })
+
+  const mockGetStatus = vi
+    .fn<(name: string) => Promise<PrinterStatus>>()
+    .mockResolvedValue(readyStatus)
 
   const spoolingJob: PrintJob = {
     id: 42,
@@ -161,6 +281,11 @@ describe('waitForJobCompletion — stall detection', () => {
     jobStatusLabels: ['Printing']
   }
 
+  beforeEach(() => {
+    mockGetStatus.mockClear()
+    mockGetStatus.mockResolvedValue(readyStatus)
+  })
+
   it('aborts early when job is stuck in Spooling for 20s without Printing', async () => {
     const mockGetJobs = vi
       .fn<(name: string) => Promise<PrintJob[]>>()
@@ -169,11 +294,9 @@ describe('waitForJobCompletion — stall detection', () => {
     const promise = waitForJobCompletion(
       'TestPrinter',
       42,
-      {
-        timeoutMs: 90_000,
-        pollIntervalMs: 2_000
-      },
-      mockGetJobs
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      mockGetStatus
     )
 
     // Advance past the 20s stall threshold (11 polls at 2s each = 22s)
@@ -190,7 +313,6 @@ describe('waitForJobCompletion — stall detection', () => {
   })
 
   it('does not stall-abort if job transitions to Printing', async () => {
-    // First 3 polls: Spooling. Then transitions to Printing. Then drains.
     const mockGetJobs = vi
       .fn<(name: string) => Promise<PrintJob[]>>()
       .mockResolvedValueOnce([spoolingJob])
@@ -203,11 +325,9 @@ describe('waitForJobCompletion — stall detection', () => {
     const promise = waitForJobCompletion(
       'TestPrinter',
       42,
-      {
-        timeoutMs: 90_000,
-        pollIntervalMs: 2_000
-      },
-      mockGetJobs
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      mockGetStatus
     )
 
     for (let i = 0; i < 6; i++) {
@@ -228,11 +348,9 @@ describe('waitForJobCompletion — stall detection', () => {
     const promise = waitForJobCompletion(
       'TestPrinter',
       42,
-      {
-        timeoutMs: 90_000,
-        pollIntervalMs: 2_000
-      },
-      mockGetJobs
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      mockGetStatus
     )
 
     for (let i = 0; i < 3; i++) {
@@ -260,11 +378,9 @@ describe('waitForJobCompletion — stall detection', () => {
     const promise = waitForJobCompletion(
       'TestPrinter',
       42,
-      {
-        timeoutMs: 90_000,
-        pollIntervalMs: 2_000
-      },
-      mockGetJobs
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      mockGetStatus
     )
 
     for (let i = 0; i < 2; i++) {
@@ -276,5 +392,99 @@ describe('waitForJobCompletion — stall detection', () => {
     if (!result.verified) {
       expect(result.reason).toBe('paper_out')
     }
+  })
+
+  it('aborts early when printer reports paper_out during verification', async () => {
+    const paperOutPrinterStatus: PrinterStatus = {
+      ...readyStatus,
+      state: 'error',
+      rawStatusCode: PRINTER_STATUS.PAPER_OUT,
+      detail: 'PaperOut (code 16)'
+    }
+
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValue([printingJob])
+
+    const localMockGetStatus = vi
+      .fn<(name: string) => Promise<PrinterStatus>>()
+      .mockResolvedValue(paperOutPrinterStatus)
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      localMockGetStatus
+    )
+
+    // First poll should detect the printer status and abort
+    await vi.advanceTimersByTimeAsync(2_000)
+
+    const result = await promise
+    expect(result.verified).toBe(false)
+    if (!result.verified) {
+      expect(result.reason).toBe('paper_out')
+      expect(result.lastLabels).toContain('Printing')
+    }
+  })
+
+  it('aborts early when printer goes offline during verification', async () => {
+    const offlinePrinterStatus: PrinterStatus = {
+      ...readyStatus,
+      state: 'offline',
+      rawStatusCode: PRINTER_STATUS.OFFLINE,
+      detail: 'Offline (code 128)'
+    }
+
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValue([printingJob])
+
+    const localMockGetStatus = vi
+      .fn<(name: string) => Promise<PrinterStatus>>()
+      .mockResolvedValue(offlinePrinterStatus)
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      localMockGetStatus
+    )
+
+    await vi.advanceTimersByTimeAsync(2_000)
+
+    const result = await promise
+    expect(result.verified).toBe(false)
+    if (!result.verified) {
+      expect(result.reason).toBe('offline')
+    }
+  })
+
+  it('does not abort when printer status is healthy', async () => {
+    // Printer stays ready, job eventually drains
+    const mockGetJobs = vi
+      .fn<(name: string) => Promise<PrintJob[]>>()
+      .mockResolvedValueOnce([printingJob])
+      .mockResolvedValueOnce([printingJob])
+      .mockResolvedValue([])
+
+    const promise = waitForJobCompletion(
+      'TestPrinter',
+      42,
+      { timeoutMs: 90_000, pollIntervalMs: 2_000 },
+      mockGetJobs,
+      mockGetStatus
+    )
+
+    for (let i = 0; i < 3; i++) {
+      await vi.advanceTimersByTimeAsync(2_000)
+    }
+
+    const result = await promise
+    expect(result.verified).toBe(true)
+    // getStatus should have been called on each iteration where job was present
+    expect(mockGetStatus).toHaveBeenCalled()
   })
 })

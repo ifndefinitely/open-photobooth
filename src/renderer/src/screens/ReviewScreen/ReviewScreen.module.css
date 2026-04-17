@@ -75,3 +75,19 @@
   padding: 16px;
   font-size: 1rem;
 }
+
+.resetMessage {
+  color: var(--color-success);
+  text-align: center;
+  font-size: 1rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.resetMessageFailed {
+  color: var(--color-error);
+  text-align: center;
+  font-size: 1rem;
+  margin: 0;
+  flex-shrink: 0;
+}

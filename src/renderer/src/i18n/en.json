@@ -63,6 +63,8 @@
   "printer.reset.inProgress": "Resetting...",
   "printer.reset.success": "Printer reset. Press 'Try again' to retry.",
   "printer.reset.failed": "Reset failed. Unplug and replug the USB cable.",
+  "printer.reset.buttonFailed": "Reset failed",
+  "review.reset.success": "Printer reset! You can now print your photos.",
   "home.printer.unavailable.halt": "Printer unavailable — please see the host",
   "home.printer.unavailable.captureOnly": "Printer offline — your strip will be saved for later",
   "review.button.saveOnly": "Save",

@@ -5,6 +5,8 @@ import { useSessionStore } from '@/stores/sessionStore'
 import { useStripStore } from '@/stores/stripStore'
 import { useStripSettingsStore } from '@/stores/stripSettingsStore'
 import { usePrinterSettingsStore } from '@/stores/printerSettingsStore'
+import { usePrinterStatusStore } from '@/stores/printerStatusStore'
+import type { PrinterStatus } from '@/stores/printerStatusStore'
 import { useIdleTimeout } from '@/hooks/useIdleTimeout'
 import { useStripComposition } from '@/hooks/useStripComposition'
 import { useAutoSave } from '@/hooks/useAutoSave'
@@ -18,6 +20,7 @@ import type { FilterType } from '@/stores/stripStore'
 import styles from './ReviewScreen.module.css'
 
 type ConfirmAction = 'abort' | 'printerError' | null
+type ResetState = 'idle' | 'inProgress' | 'success' | 'failed'
 
 function ReviewScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
@@ -36,12 +39,14 @@ function ReviewScreen(): React.JSX.Element {
   const filterVintage = useStripSettingsStore((s) => s.filterVintage)
 
   const printerName = usePrinterSettingsStore((s) => s.printerName)
+  const setStatus = usePrinterStatusStore((s) => s.setStatus)
   const { bannerMode } = useCaptureAvailability()
   const setWasPrinted = useStripStore((s) => s.setWasPrinted)
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
   const [isCheckingPrinter, setIsCheckingPrinter] = useState(false)
   const [printerErrorDetail, setPrinterErrorDetail] = useState('')
+  const [resetState, setResetState] = useState<ResetState>('idle')
   const { remainingSeconds } = useIdleTimeout({ onTimeout: goHome })
   const t = useT()
 
@@ -80,6 +85,21 @@ function ReviewScreen(): React.JSX.Element {
     }
   }, [printerName, navigateTo])
 
+  const handleResetPrinter = async (): Promise<void> => {
+    if (!printerName || resetState === 'inProgress') return
+    setResetState('inProgress')
+    try {
+      const result = await window.api.printer.resetPrinter(printerName)
+      if (result.success) {
+        const fresh = await window.api.printer.getStatus(printerName)
+        setStatus(fresh as PrinterStatus)
+      }
+      setResetState(result.success ? 'success' : 'failed')
+    } catch {
+      setResetState('failed')
+    }
+  }
+
   // Orchestrate the composition pipeline
   useStripComposition()
 
@@ -97,6 +117,8 @@ function ReviewScreen(): React.JSX.Element {
   }, [filtersEnabled, filterBlackAndWhite, filterSepia, filterVintage])
 
   const showFilters = availableFilters.length > 1
+
+  const isActionDisabled = isComposing || !!compositionError
 
   return (
     <div className={styles.container}>
@@ -119,20 +141,47 @@ function ReviewScreen(): React.JSX.Element {
         )}
       </div>
 
+      {bannerMode === 'captureOnly' && resetState === 'success' && (
+        <p className={styles.resetMessage}>{t('review.reset.success')}</p>
+      )}
+      {bannerMode === 'captureOnly' && resetState === 'failed' && (
+        <p className={styles.resetMessageFailed}>{t('printer.reset.failed')}</p>
+      )}
+
       <div className={styles.actions}>
         {bannerMode === 'captureOnly' ? (
-          <button
-            className={styles.buttonPrimary}
-            onClick={handleSavePress}
-            disabled={isComposing || !!compositionError}
-          >
-            {t('review.button.saveOnly')}
-          </button>
+          <>
+            <button
+              className={styles.buttonSecondary}
+              onClick={handleSavePress}
+              disabled={isActionDisabled}
+            >
+              {t('review.button.saveOnly')}
+            </button>
+            <button
+              className={styles.buttonSecondary}
+              onClick={handleResetPrinter}
+              disabled={isActionDisabled || resetState === 'inProgress'}
+            >
+              {resetState === 'inProgress'
+                ? t('printer.reset.inProgress')
+                : t('printer.error.buttonReset')}
+            </button>
+            {resetState === 'success' && (
+              <button
+                className={styles.buttonPrimary}
+                onClick={handlePrintPress}
+                disabled={isActionDisabled || isCheckingPrinter}
+              >
+                {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
+              </button>
+            )}
+          </>
         ) : (
           <button
             className={styles.buttonPrimary}
             onClick={handlePrintPress}
-            disabled={isComposing || !!compositionError || isCheckingPrinter}
+            disabled={isActionDisabled || isCheckingPrinter}
           >
             {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
           </button>

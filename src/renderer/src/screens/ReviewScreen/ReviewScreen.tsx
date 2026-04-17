@@ -17,7 +17,7 @@ import FilterSelector from '@/components/FilterSelector/FilterSelector'
 import type { FilterType } from '@/stores/stripStore'
 import styles from './ReviewScreen.module.css'
 
-type ConfirmAction = 'abort' | 'redo' | 'print' | 'printerError' | null
+type ConfirmAction = 'abort' | 'printerError' | null
 
 function ReviewScreen(): React.JSX.Element {
   const navigateTo = useNavigationStore((s) => s.navigateTo)
@@ -137,9 +137,6 @@ function ReviewScreen(): React.JSX.Element {
             {isCheckingPrinter ? t('review.checkingPrinter') : t('review.print')}
           </button>
         )}
-        <button className={styles.buttonSecondary} onClick={() => setConfirmAction('redo')}>
-          {t('review.redo')}
-        </button>
         <button className={styles.buttonDanger} onClick={() => setConfirmAction('abort')}>
           {t('review.abort')}
         </button>
@@ -157,20 +154,6 @@ function ReviewScreen(): React.JSX.Element {
           cancelLabel={t('review.confirmAbort.cancel')}
           variant="danger"
           onConfirm={() => navigateTo('home')}
-          onCancel={() => setConfirmAction(null)}
-        />
-      )}
-      {confirmAction === 'print' && (
-        <ConfirmationDialog
-          title={t('print.confirm.title')}
-          message={t('print.confirm.message')}
-          confirmLabel={t('print.confirm.confirm')}
-          cancelLabel={t('print.confirm.cancel')}
-          onConfirm={() => {
-            setConfirmAction(null)
-            setWasPrinted(true)
-            navigateTo('print')
-          }}
           onCancel={() => setConfirmAction(null)}
         />
       )}
